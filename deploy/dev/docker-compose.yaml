@@ -1,0 +1,20 @@
+version: '3.7'
+networks:
+  cleango:
+    name: cleango
+services:
+  # cleango:
+  #   build:
+  #     context: .
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - cleango
+  postgres:
+    image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: cleango
+      POSTGRES_USER: cleango
+      POSTGRES_DB: cleango
+    ports:
+      - 5432:5432

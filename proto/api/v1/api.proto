@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package api.v1;
+
+option go_package = "github.com/aqaurius6666/clean-go/pkg/pb/apipb;apipb";
+
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/http.proto";
+
+service ApiService {
+    rpc GetEntity (GetEntityRequest) returns (GetEntityResponse) {}
+}
+message GetEntityRequest {
+}
+
+message GetEntityResponse {
+    google.protobuf.Any entity = 1;
+}
