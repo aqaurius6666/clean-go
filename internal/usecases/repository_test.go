@@ -27,7 +27,9 @@ var (
 func TestListUsers(t *testing.T) {
 	var repo Repository
 	// ctx := context.Background()
-	repo, err := orm.NewORMRepository(cfg)
+	db, err := orm.ConnectGorm(cfg)
+	assert.Nil(t, err)
+	repo = &orm.ORMRepository{DB: db}
 	assert.Nil(t, err)
 	type args struct {
 		ctx context.Context
@@ -67,7 +69,9 @@ func TestListUsers(t *testing.T) {
 func TestInsertUser(t *testing.T) {
 	var repo Repository
 	// ctx := context.Background()
-	repo, err := orm.NewORMRepository(cfg)
+	db, err := orm.ConnectGorm(cfg)
+	assert.Nil(t, err)
+	repo = &orm.ORMRepository{DB: db}
 	assert.Nil(t, err)
 	type args struct {
 		ctx context.Context
@@ -109,7 +113,9 @@ func TestInsertUser(t *testing.T) {
 func TestGetUserById(t *testing.T) {
 	var repo Repository
 	// ctx := context.Background()
-	repo, err := orm.NewORMRepository(cfg)
+	db, err := orm.ConnectGorm(cfg)
+	assert.Nil(t, err)
+	repo = &orm.ORMRepository{DB: db}
 	assert.Nil(t, err)
 	type args struct {
 		ctx context.Context

@@ -1,14 +1,18 @@
 version: v1
 plugins:
   - name: gogo
-    out: ../pkg/pb
+    out: pkg
     opt: 
       - paths=source_relative
       - Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types
       - Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types
-#  - name: go-grpc
-#    out: ../pkg/pb
-#    opt: paths=source_relative
+  - name: validate
+    out: pkg
+    opt: 
+      - lang=go
+      - paths=source_relative
+      - Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types
+      - Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types
 #  - name: grpc-gateway
 #    out: ../pkg/pb
 #    opt:

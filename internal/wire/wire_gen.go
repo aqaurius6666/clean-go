@@ -9,6 +9,7 @@ package wire
 import (
 	"context"
 	"github.com/aqaurius6666/clean-go/internal/config"
+	"github.com/aqaurius6666/clean-go/internal/generics"
 	"github.com/aqaurius6666/clean-go/internal/repositories/orm"
 	"github.com/aqaurius6666/clean-go/internal/restapi"
 	"github.com/aqaurius6666/clean-go/internal/restapi/v1"
@@ -21,9 +22,12 @@ import (
 func BuildApp(ctx context.Context, cfg config.AppConfig) (*App, error) {
 	engine := gin.New()
 	dbConfig := cfg.Db
-	ormRepository, err := orm.NewORMRepository(dbConfig)
+	db, err := orm.ConnectGorm(dbConfig)
 	if err != nil {
 		return nil, err
+	}
+	ormRepository := &orm.ORMRepository{
+		DB: db,
 	}
 	usecasesService := &usecases.UsecasesService{
 		Repo: ormRepository,
@@ -31,11 +35,14 @@ func BuildApp(ctx context.Context, cfg config.AppConfig) (*App, error) {
 	handler := &v1.Handler{
 		Usecase: usecasesService,
 	}
+	ormGenericRepository := generics.NewUserGenericRepository(db)
+	genericHandler := NewUserHandler(ormGenericRepository)
 	middleware := &v1.Middleware{}
 	restAPIServer := &restapi.RestAPIServer{
-		G:          engine,
-		Handler:    handler,
-		Middleware: middleware,
+		G:           engine,
+		Handler:     handler,
+		UserHandler: genericHandler,
+		Middleware:  middleware,
 	}
 	app := &App{
 		RestApiServer: restAPIServer,

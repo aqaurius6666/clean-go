@@ -1,12 +1,36 @@
-package orm
+package generics
 
 import (
 	"context"
 	"fmt"
 
+	"github.com/aqaurius6666/clean-go/internal/entities"
 	"github.com/aqaurius6666/clean-go/pkg/gentity"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
+
+type ORMGenericRepository[T gentity.E] struct {
+	db *gorm.DB
+}
+
+func NewUserGenericRepository(db *gorm.DB) *ORMGenericRepository[*entities.User] {
+	return &ORMGenericRepository[*entities.User]{
+		db: db,
+	}
+}
+
+func (s *ORMGenericRepository[T]) GetEntity(ctx context.Context, ext gentity.Extend[T]) (T, error) {
+	return GetEntity(ctx, s.db, ext)
+}
+
+func (s *ORMGenericRepository[T]) GetEntityById(ctx context.Context, id uuid.UUID) (T, error) {
+	return GetEntityById[T](ctx, s.db, id.String())
+}
+
+func (s *ORMGenericRepository[T]) ListEntities(ctx context.Context, ext gentity.Extend[T]) ([]T, error) {
+	return ListEntities(ctx, s.db, ext)
+}
 
 func ApplyExtend[T gentity.E](db *gorm.DB, ext gentity.Extend[T]) *gorm.DB {
 	if ext.ExFields.Offset != nil {

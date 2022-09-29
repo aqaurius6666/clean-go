@@ -1,19 +1,48 @@
 syntax = "proto3";
 
-package api.v1;
+package proto.api.v1;
 
-option go_package = "github.com/aqaurius6666/clean-go/pkg/pb/apipb;apipb";
+option go_package = "github.com/aqaurius6666/clean-go/pkg/proto/apipb/v1;apipb";
 
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 import "google/api/http.proto";
+import "validate/validate.proto";
+import "gogoproto/gogo.proto";
 
 service ApiService {
     rpc GetEntity (GetEntityRequest) returns (GetEntityResponse) {}
 }
+
+message UserEntity {
+    string id = 1;
+    string name = 2;
+}
 message GetEntityRequest {
+    string id = 1 [
+        (validate.rules).string = {
+            uuid: true,
+            ignore_empty: true
+        },
+        (gogoproto.moretags) = "form:\"id\""
+    ];
+    int32 offset = 2 [
+        (validate.rules).int32 = {
+            ignore_empty: true,
+        },
+        (gogoproto.moretags) = "form:\"offset\"",
+        (gogoproto.casttype) = "int"
+    ];
+    int32 limit = 3[
+        (validate.rules).int32 = {
+            ignore_empty: true,
+        },
+        (gogoproto.moretags) = "form:\"limit\"",
+        (gogoproto.casttype) = "int"
+    ];
 }
 
 message GetEntityResponse {
     google.protobuf.Any entity = 1;
+    repeated google.protobuf.Any entities = 2;
 }

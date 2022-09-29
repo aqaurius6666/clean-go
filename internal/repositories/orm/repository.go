@@ -12,10 +12,10 @@ import (
 )
 
 type ORMRepository struct {
-	db *gorm.DB
+	DB *gorm.DB
 }
 
-func NewORMRepository(cfg config.DBConfig) (*ORMRepository, error) {
+func ConnectGorm(cfg config.DBConfig) (*gorm.DB, error) {
 	gormOpts := []gorm.Option{}
 	var (
 		db  *gorm.DB
@@ -34,11 +34,9 @@ func NewORMRepository(cfg config.DBConfig) (*ORMRepository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ORMRepository{
-		db: db,
-	}, nil
+	return db, nil
 }
 
 func (s *ORMRepository) Migrate(ctx context.Context) error {
-	return s.db.WithContext(ctx).AutoMigrate(&entities.User{})
+	return s.DB.WithContext(ctx).AutoMigrate(&entities.User{})
 }

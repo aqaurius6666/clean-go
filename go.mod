@@ -3,15 +3,15 @@ module github.com/aqaurius6666/clean-go
 go 1.19
 
 require (
+	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/gogo/protobuf v1.3.2
 	github.com/google/uuid v1.1.2
 	github.com/google/wire v0.5.0
-	github.com/pkg/errors v0.8.1
 	github.com/serenize/snaker v0.0.0-20201027110005-a7ad2135616e
 	github.com/stretchr/testify v1.8.0
 	github.com/urfave/cli/v2 v2.16.3
-	google.golang.org/grpc v1.49.0
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
 	gorm.io/driver/postgres v1.3.10
 	gorm.io/gorm v1.23.10
 )
@@ -53,7 +53,6 @@ require (
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

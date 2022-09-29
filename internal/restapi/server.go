@@ -11,9 +11,10 @@ type Server interface {
 	RegisterEndpoint()
 }
 type RestAPIServer struct {
-	G          *gin.Engine
-	Handler    Handler
-	Middleware Middleware
+	G           *gin.Engine
+	Handler     Handler
+	UserHandler UserHandler
+	Middleware  Middleware
 }
 
 func (s *RestAPIServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -23,5 +24,5 @@ func (s *RestAPIServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *RestAPIServer) RegisterEndpoint() {
 	s.G.Use(gin.Recovery())
 	s.G.Use(gin.Logger())
-	s.G.GET("/user", s.Handler.HandleGetUser)
+	s.G.GET("/user", s.UserHandler.Get)
 }
