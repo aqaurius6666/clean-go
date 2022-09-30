@@ -8,4 +8,14 @@ type Handler interface {
 
 type UserHandler interface {
 	Get(*gin.Context)
+	Post(*gin.Context)
+	Put(*gin.Context)
+	Delete(*gin.Context)
+}
+
+type PostHandler interface {
+	Get(*gin.Context)
+	Post(*gin.Context)
+	Put(*gin.Context)
+	Delete(*gin.Context)
 }

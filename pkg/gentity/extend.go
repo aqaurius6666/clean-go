@@ -1,6 +1,5 @@
 package gentity
 
-
 type Extend[T E] struct {
 	Entity   T
 	ExFields *ExtendFields
@@ -11,7 +10,14 @@ type ExtendFields struct {
 	Fields    []string
 	OrderBy   []string
 	OrderType []OrderType
+	Filters   []Filter `validate:"dive"`
 	Debug     bool
+	Joins     []string
+}
+type Filter struct {
+	Field    string      `json:"f" validate:"required"`
+	Operator string      `json:"o" validate:"eq==|eq=<>|eq=>|eq=<|eq=>=|eq=<="`
+	Value    interface{} `json:"v" validate:"required"`
 }
 type Options interface {
 	apply(*ExtendFields)
@@ -31,11 +37,57 @@ func WithExtend[T E](entity T, ex *ExtendFields, opts ...Options) Extend[T] {
 }
 
 type OrderType string
+type Operator string
 
 var (
 	ASC  OrderType = "ASC"
 	DESC OrderType = "DESC"
+
+	EQ Operator = "eq"
+	NE Operator = "ne"
+	GT Operator = "gt"
+	GE Operator = "ge"
+	LT Operator = "lt"
+	LE Operator = "le"
 )
+
+func (s Operator) ToOp() string {
+	switch s {
+	case EQ:
+		return "="
+	case NE:
+		return "!="
+	case GT:
+		return ">"
+	case GE:
+		return ">="
+	case LT:
+		return "<"
+	case LE:
+		return "<="
+	default:
+		panic("invalid operator")
+	}
+}
+
+// func ToOperator(a string) Operator {
+// 	switch a {
+// 	case "eq":
+// 		return EQ
+// 	case "ne":
+// 		return NE
+// 	case "gt":
+// 		return GT
+// 	case "ge":
+// 		return GE
+// 	case "lt":
+// 		return LT
+// 	case "le":
+// 		return LE
+// 	default:
+// 		return EQ
+// 	}
+// }
 
 type offset struct {
 	value int

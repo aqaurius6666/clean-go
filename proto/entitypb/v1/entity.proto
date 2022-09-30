@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package proto.entitypb.v1;
+
+option go_package = "github.com/aqaurius6666/clean-go/pkg/proto/entitypb/v1;entitypb";
+import "validate/validate.proto";
+
+message User {
+    string id = 1;
+    string name = 2 [
+        (validate.rules).string = {
+            min_len: 1,
+            max_len: 50
+        }
+    ];
+}
+
+message Post {
+    string id = 1;
+    string title = 2 [
+        (validate.rules).string = {
+            min_len: 1,
+            max_len: 50
+        }
+    ];
+    string creator_id = 3 [
+        (validate.rules).string = {
+            uuid: true
+        }
+    ];
+    User creator = 4 [
+        (validate.rules).message = {
+            required: false
+        }
+    ];
+}

@@ -1,0 +1,42 @@
+POST http://localhost:8080/user
+
+{
+    "id" : "e6d6402d-7683-4367-9230-f134990feedd",
+    "name" : "asd"
+}
+
+###
+GET http://localhost:8080/user
+
+
+###
+PUT http://localhost:8080/user/3c07de7f-bcdd-4113-96b6-150eef312f97
+
+{
+    "name" : "asdaasdasda",
+
+}
+
+###
+DELETE  http://localhost:8080/user/09ef4913-0497-4566-83e1-adb76094836e
+
+###
+GET http://localhost:8080/post?joins=["Creator"]&&filters=[{"f":"posts\".\"id","o":"=","v":"61223570-cd04-4669-9c47-ee3f1699e7e9"}]
+
+
+###
+POST http://localhost:8080/post
+
+{
+    "id" : "e6d6402d-7683-4367-9230-f134990feedd",
+    "title" : "asd",
+    "creator_id" : "61184630-9b2e-420f-af0e-eecfc9a84937"
+}
+
+###
+PUT http://localhost:8080/post/61223570-cd04-4669-9c47-ee3f1699e7e9
+
+{
+    "title" : "asdasdasd",
+    "creator_id" : "61184630-9b2e-420f-af0e-eecfc9a84937"
+}

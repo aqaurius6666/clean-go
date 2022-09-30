@@ -37,11 +37,14 @@ func BuildApp(ctx context.Context, cfg config.AppConfig) (*App, error) {
 	}
 	ormGenericRepository := generics.NewUserGenericRepository(db)
 	genericHandler := NewUserHandler(ormGenericRepository)
+	genericsORMGenericRepository := generics.NewPostGenericRepository(db)
+	genericsGenericHandler := NewPostHandler(genericsORMGenericRepository)
 	middleware := &v1.Middleware{}
 	restAPIServer := &restapi.RestAPIServer{
 		G:           engine,
 		Handler:     handler,
 		UserHandler: genericHandler,
+		PostHandler: genericsGenericHandler,
 		Middleware:  middleware,
 	}
 	app := &App{

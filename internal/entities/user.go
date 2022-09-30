@@ -9,8 +9,13 @@ type User struct {
 	Name string    `json:"name"`
 }
 
-func (s *User) GetId() string {
-	return s.ID.String()
+func (s *User) SetId(id interface{}) {
+	switch t := id.(type) {
+	case string:
+		s.ID = uuid.MustParse(t)
+	case uuid.UUID:
+		s.ID = t
+	}
 }
 
 func (*User) IsEntity() {}

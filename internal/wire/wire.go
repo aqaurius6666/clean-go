@@ -7,7 +7,7 @@ import (
 	"github.com/aqaurius6666/clean-go/internal/restapi"
 	v1 "github.com/aqaurius6666/clean-go/internal/restapi/v1"
 	"github.com/aqaurius6666/clean-go/internal/usecases"
-	apipb "github.com/aqaurius6666/clean-go/pkg/proto/api/v1"
+	"github.com/aqaurius6666/clean-go/pkg/proto/entitypb/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
@@ -32,13 +32,21 @@ var (
 		RestApiV1Set,
 		gin.New,
 		UserGenericSet,
+		PostGenericSet,
 	)
 	RestApiV1Set   = wire.NewSet(wire.Struct(new(v1.Handler), "*"), wire.Struct(new(v1.Middleware), "*"))
 	UserGenericSet = wire.NewSet(
 		NewUserHandler,
 		generics.NewUserGenericRepository,
 		wire.Bind(new(generics.GenericRepository[*entities.User]), new(*generics.ORMGenericRepository[*entities.User])),
-		wire.Bind(new(restapi.UserHandler), new(*generics.GenericHandler[*entities.User, *apipb.UserEntity])))
+		wire.Bind(new(restapi.UserHandler), new(*generics.GenericHandler[*entities.User, *entitypb.User])),
+	)
+	PostGenericSet = wire.NewSet(
+		NewPostHandler,
+		generics.NewPostGenericRepository,
+		wire.Bind(new(generics.GenericRepository[*entities.Post]), new(*generics.ORMGenericRepository[*entities.Post])),
+		wire.Bind(new(restapi.PostHandler), new(*generics.GenericHandler[*entities.Post, *entitypb.Post])),
+	)
 )
 
 // interface constraints
@@ -49,13 +57,19 @@ var (
 	_ usecases.Migrator                          = (*orm.ORMRepository)(nil)
 	_ restapi.Server                             = (*restapi.RestAPIServer)(nil)
 	_ restapi.Handler                            = (*v1.Handler)(nil)
-	_ restapi.UserHandler                        = (*generics.GenericHandler[*entities.User, *apipb.UserEntity])(nil)
+	_ restapi.UserHandler                        = (*generics.GenericHandler[*entities.User, *entitypb.User])(nil)
 	_ restapi.Middleware                         = (*v1.Middleware)(nil)
 )
 
 // generic initializer
-func NewUserHandler(repo generics.GenericRepository[*entities.User]) *generics.GenericHandler[*entities.User, *apipb.UserEntity] {
-	return &generics.GenericHandler[*entities.User, *apipb.UserEntity]{
+func NewUserHandler(repo generics.GenericRepository[*entities.User]) *generics.GenericHandler[*entities.User, *entitypb.User] {
+	return &generics.GenericHandler[*entities.User, *entitypb.User]{
+		Usecase: repo,
+	}
+}
+
+func NewPostHandler(repo generics.GenericRepository[*entities.Post]) *generics.GenericHandler[*entities.Post, *entitypb.Post] {
+	return &generics.GenericHandler[*entities.Post, *entitypb.Post]{
 		Usecase: repo,
 	}
 }

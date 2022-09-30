@@ -19,6 +19,11 @@ func NewUserGenericRepository(db *gorm.DB) *ORMGenericRepository[*entities.User]
 		db: db,
 	}
 }
+func NewPostGenericRepository(db *gorm.DB) *ORMGenericRepository[*entities.Post] {
+	return &ORMGenericRepository[*entities.Post]{
+		db: db,
+	}
+}
 
 func (s *ORMGenericRepository[T]) GetEntity(ctx context.Context, ext gentity.Extend[T]) (T, error) {
 	return GetEntity(ctx, s.db, ext)
@@ -30,6 +35,19 @@ func (s *ORMGenericRepository[T]) GetEntityById(ctx context.Context, id uuid.UUI
 
 func (s *ORMGenericRepository[T]) ListEntities(ctx context.Context, ext gentity.Extend[T]) ([]T, error) {
 	return ListEntities(ctx, s.db, ext)
+}
+func (s *ORMGenericRepository[T]) TotalEntity(ctx context.Context, ext gentity.Extend[T]) (int64, error) {
+	return TotalEntity(ctx, s.db, ext)
+}
+
+func (s *ORMGenericRepository[T]) InsertEntity(ctx context.Context, ext gentity.Extend[T]) (T, error) {
+	return InsertEntity(ctx, s.db, ext)
+}
+func (s *ORMGenericRepository[T]) UpdateEntity(ctx context.Context, ext gentity.Extend[T], v T) (T, error) {
+	return UpdateEntity(ctx, s.db, ext, v)
+}
+func (s *ORMGenericRepository[T]) DeleteEntity(ctx context.Context, ext gentity.Extend[T]) error {
+	return DeleteEntity(ctx, s.db, ext)
 }
 
 func ApplyExtend[T gentity.E](db *gorm.DB, ext gentity.Extend[T]) *gorm.DB {
@@ -47,8 +65,18 @@ func ApplyExtend[T gentity.E](db *gorm.DB, ext gentity.Extend[T]) *gorm.DB {
 			db = db.Order(fmt.Sprintf("%s %s", field, ext.ExFields.OrderType[i]))
 		}
 	}
+	if ext.ExFields.Joins != nil {
+		for _, join := range ext.ExFields.Joins {
+			db = db.Joins(join)
+		}
+	}
 	if ext.ExFields.Debug {
 		db = db.Debug()
+	}
+	if ext.ExFields.Filters != nil {
+		for _, filter := range ext.ExFields.Filters {
+			db = db.Where(fmt.Sprintf("\"%s\" %s ?", filter.Field, filter.Operator), filter.Value)
+		}
 	}
 	return db
 }
@@ -82,16 +110,24 @@ func InsertEntity[T gentity.E](ctx context.Context, db *gorm.DB, ext gentity.Ext
 
 func DeleteEntity[T gentity.E](ctx context.Context, db *gorm.DB, ext gentity.Extend[T]) error {
 	db = ApplyExtend(db, ext)
-	if err := db.WithContext(ctx).Delete(ext.Entity).Error; err != nil {
+	exec := db.WithContext(ctx).Delete(ext.Entity)
+	if err := exec.Error; err != nil {
 		return err
+	}
+	if exec.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
 
 func UpdateEntity[T gentity.E](ctx context.Context, db *gorm.DB, ext gentity.Extend[T], v T) (T, error) {
 	db = ApplyExtend(db, ext)
-	if err := db.WithContext(ctx).Where(ext.Entity).Updates(v).Error; err != nil {
+	exec := db.WithContext(ctx).Where(ext.Entity).Updates(v)
+	if err := exec.Error; err != nil {
 		return v, err
+	}
+	if exec.RowsAffected == 0 {
+		return v, gorm.ErrRecordNotFound
 	}
 	return v, nil
 }
@@ -101,4 +137,13 @@ func GetEntityById[T gentity.E](ctx context.Context, db *gorm.DB, id string) (T,
 		return ret, err
 	}
 	return ret, nil
+}
+
+func TotalEntity[T gentity.E](ctx context.Context, db *gorm.DB, ext gentity.Extend[T]) (int64, error) {
+	var count int64
+	db = ApplyExtend(db, ext)
+	if err := db.WithContext(ctx).Model(ext.Entity).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }

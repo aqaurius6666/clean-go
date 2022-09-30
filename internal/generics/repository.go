@@ -10,5 +10,8 @@ import (
 type GenericRepository[T gentity.E] interface {
 	GetEntityById(ctx context.Context, id uuid.UUID) (T, error)
 	ListEntities(ctx context.Context, ext gentity.Extend[T]) ([]T, error)
-	// GetEntity(ctx context.Context, ext gentity.Extend[T]) (T, error)
+	InsertEntity(ctx context.Context, ext gentity.Extend[T]) (T, error)
+	TotalEntity(ctx context.Context, ext gentity.Extend[T]) (int64, error)
+	UpdateEntity(ctx context.Context, ext gentity.Extend[T], v T) (T, error)
+	DeleteEntity(ctx context.Context, ext gentity.Extend[T]) error
 }

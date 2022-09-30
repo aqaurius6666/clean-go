@@ -38,5 +38,5 @@ func ConnectGorm(cfg config.DBConfig) (*gorm.DB, error) {
 }
 
 func (s *ORMRepository) Migrate(ctx context.Context) error {
-	return s.DB.WithContext(ctx).AutoMigrate(&entities.User{})
+	return s.DB.WithContext(ctx).AutoMigrate(&entities.User{}, &entities.Post{})
 }

@@ -18,7 +18,7 @@ go install github.com/bufbuild/buf/cmd/buf@latest" \
 	@ buf generate --template buf.gen.yaml
 
 wire:
-	@ wire ./...
+	@ wire internal/...
 
 run:
 	@ export $(cat deploy/dev/.env | xargs) && go run ./... serve
