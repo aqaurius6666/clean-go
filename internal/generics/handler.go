@@ -32,7 +32,7 @@ func (s *GenericHandler[T, K]) Get(g *gin.Context) {
 		return
 	}
 	if req.Id != "" {
-		ent, err := s.Usecase.GetEntityById(g.Request.Context(), uuid.MustParse(req.Id))
+		ent, err := s.Usecase.GetEntityById(g.Request.Context(), req.Id)
 		if err != nil {
 			response.Response400(g, err)
 			return

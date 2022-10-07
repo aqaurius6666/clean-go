@@ -3,19 +3,23 @@ package restapi
 import "github.com/gin-gonic/gin"
 
 type Handler interface {
-	HandleGetUser(g *gin.Context)
+	UserHandler
+	AuthHandler
+	PostHandler
+}
+
+type AuthHandler interface {
+	HandleLoginPost(g *gin.Context)
+	HandleRegisterPost(g *gin.Context)
+	HandleRefreshPost(g *gin.Context)
 }
 
 type UserHandler interface {
-	Get(*gin.Context)
-	Post(*gin.Context)
-	Put(*gin.Context)
-	Delete(*gin.Context)
+	HandleMeGet(*gin.Context)
+	HandleMePut(*gin.Context)
 }
 
 type PostHandler interface {
-	Get(*gin.Context)
-	Post(*gin.Context)
-	Put(*gin.Context)
-	Delete(*gin.Context)
+	HandlePostsMeGet(*gin.Context)
+	HandlePostsPost(*gin.Context)
 }

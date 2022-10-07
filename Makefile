@@ -25,3 +25,6 @@ run:
 
 dev-recreate:
 	@ docker-compose -f deploy/dev/docker-compose.yaml up -d --force-recreate --build
+
+kafka:
+	@ docker-compose -f deploy/dev/kafka.docker-compose.yaml up -d

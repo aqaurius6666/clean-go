@@ -4,11 +4,10 @@ import (
 	"context"
 
 	"github.com/aqaurius6666/clean-go/pkg/gentity"
-	"github.com/google/uuid"
 )
 
 type GenericRepository[T gentity.E] interface {
-	GetEntityById(ctx context.Context, id uuid.UUID) (T, error)
+	GetEntityById(ctx context.Context, id string) (T, error)
 	ListEntities(ctx context.Context, ext gentity.Extend[T]) ([]T, error)
 	InsertEntity(ctx context.Context, ext gentity.Extend[T]) (T, error)
 	TotalEntity(ctx context.Context, ext gentity.Extend[T]) (int64, error)

@@ -9,52 +9,53 @@ package wire
 import (
 	"context"
 	"github.com/aqaurius6666/clean-go/internal/config"
-	"github.com/aqaurius6666/clean-go/internal/generics"
-	"github.com/aqaurius6666/clean-go/internal/repositories/orm"
+	"github.com/aqaurius6666/clean-go/internal/repositories"
 	"github.com/aqaurius6666/clean-go/internal/restapi"
 	"github.com/aqaurius6666/clean-go/internal/restapi/v1"
 	"github.com/aqaurius6666/clean-go/internal/usecases"
 	"github.com/gin-gonic/gin"
 )
 
-// Injectors from app_wire.go:
+// Injectors from wire.go:
 
 func BuildApp(ctx context.Context, cfg config.AppConfig) (*App, error) {
 	engine := gin.New()
+	logConfig := cfg.Log
+	logger := config.NewLogger(logConfig)
+	authConfig := cfg.Auth
 	dbConfig := cfg.Db
-	db, err := orm.ConnectGorm(dbConfig)
+	repositoryImpl, err := repositories.BuildRepository(logger, dbConfig)
 	if err != nil {
 		return nil, err
 	}
-	ormRepository := &orm.ORMRepository{
-		DB: db,
-	}
+	repository := CastRepository(repositoryImpl)
 	usecasesService := &usecases.UsecasesService{
-		Repo: ormRepository,
+		Logger:     logger,
+		AuthConfig: authConfig,
+		Repo:       repository,
 	}
 	handler := &v1.Handler{
 		Usecase: usecasesService,
 	}
-	ormGenericRepository := generics.NewUserGenericRepository(db)
-	genericHandler := NewUserHandler(ormGenericRepository)
-	genericsORMGenericRepository := generics.NewPostGenericRepository(db)
-	genericsGenericHandler := NewPostHandler(genericsORMGenericRepository)
-	middleware := &v1.Middleware{}
-	restAPIServer := &restapi.RestAPIServer{
-		G:           engine,
-		Handler:     handler,
-		UserHandler: genericHandler,
-		PostHandler: genericsGenericHandler,
-		Middleware:  middleware,
+	middleware := &v1.Middleware{
+		L:        logger,
+		Usecases: usecasesService,
 	}
+	restAPIServer := &restapi.RestAPIServer{
+		G:          engine,
+		Logger:     logger,
+		Handler:    handler,
+		Middleware: middleware,
+	}
+	migrator := CastMigrator(repositoryImpl)
 	app := &App{
 		RestApiServer: restAPIServer,
-		Migrator:      ormRepository,
+		Migrator:      migrator,
 	}
 	return app, nil
 }
 
-// app_wire.go:
+// wire.go:
 
 type App struct {
 	RestApiServer restapi.Server

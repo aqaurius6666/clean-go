@@ -35,9 +35,6 @@ var (
 	_ = sort.Sort
 )
 
-// define the regex for a UUID once up-front
-var _entity_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
-
 // Validate checks the field values on User with the rules defined in the proto
 // definition for this message. If any rules are violated, the first error
 // encountered is returned, or nil if there are no violations.
@@ -170,7 +167,9 @@ func (m *Post) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Id
+	if m.GetId() != "" {
+
+	}
 
 	if l := utf8.RuneCountInString(m.GetTitle()); l < 1 || l > 50 {
 		err := PostValidationError{
@@ -183,16 +182,8 @@ func (m *Post) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if err := m._validateUuid(m.GetCreatorId()); err != nil {
-		err = PostValidationError{
-			field:  "CreatorId",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
+	if m.GetCreatorId() != "" {
+
 	}
 
 	if all {
@@ -226,14 +217,6 @@ func (m *Post) validate(all bool) error {
 
 	if len(errors) > 0 {
 		return PostMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *Post) _validateUuid(uuid string) error {
-	if matched := _entity_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
 	}
 
 	return nil
@@ -308,3 +291,134 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = PostValidationError{}
+
+// Validate checks the field values on Pagination with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Pagination) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Pagination with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in PaginationMultiError, or
+// nil if none found.
+func (m *Pagination) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Pagination) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOffset() != 0 {
+
+		if m.GetOffset() < 0 {
+			err := PaginationValidationError{
+				field:  "Offset",
+				reason: "value must be greater than or equal to 0",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+	}
+
+	if m.GetLimit() != 0 {
+
+		if m.GetLimit() < 0 {
+			err := PaginationValidationError{
+				field:  "Limit",
+				reason: "value must be greater than or equal to 0",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+	}
+
+	// no validation rules for Total
+
+	if len(errors) > 0 {
+		return PaginationMultiError(errors)
+	}
+
+	return nil
+}
+
+// PaginationMultiError is an error wrapping multiple validation errors
+// returned by Pagination.ValidateAll() if the designated constraints aren't met.
+type PaginationMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PaginationMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PaginationMultiError) AllErrors() []error { return m }
+
+// PaginationValidationError is the validation error returned by
+// Pagination.Validate if the designated constraints aren't met.
+type PaginationValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PaginationValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PaginationValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PaginationValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PaginationValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PaginationValidationError) ErrorName() string { return "PaginationValidationError" }
+
+// Error satisfies the builtin error interface
+func (e PaginationValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPagination.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PaginationValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PaginationValidationError{}

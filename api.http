@@ -1,42 +1,52 @@
-POST http://localhost:8080/user
+@host = http://localhost:8080
+@token = {{login.response.body.data.accessToken}}
+@refresh_token = {{login.response.body.data.refreshToken}}
+@email = aqaurius2@gmail.com
+@password = 123123
+###
+# @name login
+POST {{host}}/auth/login 
 
 {
-    "id" : "e6d6402d-7683-4367-9230-f134990feedd",
-    "name" : "asd"
+    "email" : "{{email}}",
+    "password" : "{{password}}"
+}
+###
+POST {{host}}/auth/register
+
+{
+    "email" : "{{email}}",
+    "password" : "{{password}}"
 }
 
 ###
-GET http://localhost:8080/user
-
-
-###
-PUT http://localhost:8080/user/3c07de7f-bcdd-4113-96b6-150eef312f97
+POST {{host}}/auth/refresh
 
 {
-    "name" : "asdaasdasda",
-
+    "refresh_token" : "{{refresh_token}}"
 }
 
 ###
-DELETE  http://localhost:8080/user/09ef4913-0497-4566-83e1-adb76094836e
+GET {{host}}/users/me
+Authorization: Bearer {{token}}
 
 ###
-GET http://localhost:8080/post?joins=["Creator"]&&filters=[{"f":"posts\".\"id","o":"=","v":"61223570-cd04-4669-9c47-ee3f1699e7e9"}]
-
-
-###
-POST http://localhost:8080/post
+PUT {{host}}/users/me
+Authorization: Bearer {{token}}
 
 {
-    "id" : "e6d6402d-7683-4367-9230-f134990feedd",
-    "title" : "asd",
-    "creator_id" : "61184630-9b2e-420f-af0e-eecfc9a84937"
+    "name" : "asdadsad"
 }
 
 ###
-PUT http://localhost:8080/post/61223570-cd04-4669-9c47-ee3f1699e7e9
+POST {{host}}/posts
+Authorization: Bearer {{token}}
 
 {
-    "title" : "asdasdasd",
-    "creator_id" : "61184630-9b2e-420f-af0e-eecfc9a84937"
+    "title" : "Title",
+    "content" : "Content"
 }
+
+###
+GET {{host}}/posts/me
+Authorization: Bearer {{token}}

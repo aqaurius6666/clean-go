@@ -11,24 +11,32 @@ func Response200(g *gin.Context, data interface{}) {
 }
 
 func Response400(g *gin.Context, err error) {
+	g.Set("error", err)
 	g.JSON(200, gin.H{
 		"success": false,
 		"code":    400,
 		"error":   err.Error(),
 	})
+	g.Abort()
+
 }
 func Response401(g *gin.Context, err error) {
+	g.Set("error", err)
 	g.JSON(200, gin.H{
 		"success": false,
 		"code":    401,
 		"error":   err.Error(),
 	})
+	g.Abort()
+
 }
 
 func Response500(g *gin.Context, err error) {
+	g.Set("error", err)
 	g.JSON(200, gin.H{
 		"success": false,
 		"code":    500,
 		"error":   err.Error(),
 	})
+	g.Abort()
 }

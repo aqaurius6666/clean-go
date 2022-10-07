@@ -3,9 +3,10 @@ deps:
   - buf.build/gogo/protobuf
   - buf.build/googleapis/googleapis
   - buf.build/envoyproxy/protoc-gen-validate
+  - buf.build/grpc-ecosystem/grpc-gateway
 breaking:
   use:
     - FILE
 lint:
   use:
-    - DEFAULT
+    - MINIMAL

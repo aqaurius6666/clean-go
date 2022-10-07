@@ -3,7 +3,9 @@ package restapi
 import (
 	"net/http"
 
+	"github.com/aqaurius6666/clean-go/pkg/swagger"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type Server interface {
@@ -11,11 +13,10 @@ type Server interface {
 	RegisterEndpoint()
 }
 type RestAPIServer struct {
-	G           *gin.Engine
-	Handler     Handler
-	UserHandler UserHandler
-	PostHandler PostHandler
-	Middleware  Middleware
+	G          *gin.Engine
+	Logger     *logrus.Logger
+	Handler    Handler
+	Middleware Middleware
 }
 
 func (s *RestAPIServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -24,14 +25,21 @@ func (s *RestAPIServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (s *RestAPIServer) RegisterEndpoint() {
 	s.G.Use(gin.Recovery())
-	s.G.Use(gin.Logger())
-	s.G.GET("/user", s.UserHandler.Get)
-	s.G.POST("/user", s.UserHandler.Post)
-	s.G.PUT("/user/:id", s.UserHandler.Put)
-	s.G.DELETE("/user/:id", s.UserHandler.Delete)
+	s.G.Use(s.Middleware.Logger)
 
-	s.G.GET("/post", s.PostHandler.Get)
-	s.G.POST("/post", s.PostHandler.Post)
-	s.G.PUT("/post/:id", s.PostHandler.Put)
-	s.G.DELETE("/post/:id", s.PostHandler.Delete)
+	s.G.GET("/swagger/*any", swagger.SwaggerHandler("api.swagger.json"))
+
+	authG := s.G.Group("/auth")
+	authG.POST("/login", s.Handler.HandleLoginPost)
+	authG.POST("/register", s.Handler.HandleRegisterPost)
+	authG.POST("/refresh", s.Handler.HandleRefreshPost)
+
+	userG := s.G.Group("/users")
+	userG.GET("/me", s.Middleware.Token, s.Handler.HandleMeGet)
+	userG.PUT("/me", s.Middleware.Token, s.Handler.HandleMePut)
+
+	postG := s.G.Group("/posts")
+	postG.POST("", s.Middleware.Token, s.Handler.HandlePostsPost)
+	postG.GET("/me", s.Middleware.Token, s.Handler.HandlePostsMeGet)
+
 }

@@ -2,35 +2,50 @@ package usecases
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
 	"github.com/aqaurius6666/clean-go/internal/config"
 	"github.com/aqaurius6666/clean-go/internal/entities"
-	"github.com/aqaurius6666/clean-go/internal/repositories/orm"
+	"github.com/aqaurius6666/clean-go/internal/repositories"
 	"github.com/aqaurius6666/clean-go/pkg/gentity"
-	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
+	// cfg = config.DBConfig{
+	// 	Scheme: "postgres",
+	// 	User:   "cleango",
+	// 	Pass:   "cleango",
+	// 	Host:   "localhost",
+	// 	Port:   "5432",
+	// 	Name:   "cleango",
+	// }
 	cfg = config.DBConfig{
-		Scheme: "postgres",
+		Scheme: "mongodb",
 		User:   "cleango",
 		Pass:   "cleango",
 		Host:   "localhost",
-		Port:   "5432",
+		Port:   "27017",
 		Name:   "cleango",
+		Query:  "authSource=admin",
 	}
 )
 
-func TestListUsers(t *testing.T) {
-	var repo Repository
+func GetRepo() Repository {
 	// ctx := context.Background()
-	db, err := orm.ConnectGorm(cfg)
-	assert.Nil(t, err)
-	repo = &orm.ORMRepository{DB: db}
-	assert.Nil(t, err)
+	repo, err := repositories.BuildRepository(logrus.New(), cfg)
+	if err != nil {
+		panic(err)
+	}
+	repo1, ok := repo.(Repository)
+	if !ok {
+		panic("repo is not Repository")
+	}
+	return repo1
+}
+func TestListUsers(t *testing.T) {
+	repo := GetRepo()
 	type args struct {
 		ctx context.Context
 		ex  gentity.Extend[*entities.User]
@@ -47,7 +62,11 @@ func TestListUsers(t *testing.T) {
 			name: "test1",
 			args: args{
 				ctx: context.Background(),
-				ex:  gentity.Extend[*entities.User]{},
+				ex: gentity.Extend[*entities.User]{
+					Entity: &entities.User{
+						ID: "633b12448f01dad0448d2afd",
+					},
+				},
 			},
 			wantErr: nil,
 		},
@@ -59,20 +78,13 @@ func TestListUsers(t *testing.T) {
 				t.Errorf("ListUsers() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ListUsers() = %v, want %v", got, tt.want)
-			}
+			assert.NotNil(t, got)
 		})
 	}
 }
 
 func TestInsertUser(t *testing.T) {
-	var repo Repository
-	// ctx := context.Background()
-	db, err := orm.ConnectGorm(cfg)
-	assert.Nil(t, err)
-	repo = &orm.ORMRepository{DB: db}
-	assert.Nil(t, err)
+	repo := GetRepo()
 	type args struct {
 		ctx context.Context
 		ex  gentity.Extend[*entities.User]
@@ -103,23 +115,17 @@ func TestInsertUser(t *testing.T) {
 				t.Errorf("InsertUser() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("InsertUser() = %v, want %v", got, tt.want)
-			}
+			assert.NotNil(t, got)
 		})
 	}
 }
 
 func TestGetUserById(t *testing.T) {
-	var repo Repository
-	// ctx := context.Background()
-	db, err := orm.ConnectGorm(cfg)
-	assert.Nil(t, err)
-	repo = &orm.ORMRepository{DB: db}
-	assert.Nil(t, err)
+	repo := GetRepo()
+	assert.NotNil(t, repo)
 	type args struct {
 		ctx context.Context
-		id  uuid.UUID
+		id  string
 	}
 	type testcase struct {
 		name    string
@@ -133,7 +139,7 @@ func TestGetUserById(t *testing.T) {
 			name: "test1",
 			args: args{
 				ctx: context.Background(),
-				id:  uuid.New(),
+				id:  "633b12448f01dad0448d2afd",
 			},
 			wantErr: nil,
 		},
@@ -145,9 +151,8 @@ func TestGetUserById(t *testing.T) {
 				t.Errorf("GetUserById() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetUserById() = %v, want %v", got, tt.want)
-			}
+			assert.NotNil(t, got)
+			assert.Equal(t, got.ID, tt.args.id)
 		})
 	}
 }

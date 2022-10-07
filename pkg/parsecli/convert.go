@@ -49,6 +49,14 @@ func Convert(src interface{}, prefixEnv string) []cli.Flag {
 				Value:   intFromString(fieldType.Tag.Get("default")),
 			}
 			flags = append(flags, flag)
+		case reflect.Int64:
+			flag := &cli.Int64Flag{
+				Name:    flagName,
+				EnvVars: []string{envName},
+				Value:   int64FromString(fieldType.Tag.Get("default")),
+			}
+			flags = append(flags, flag)
+
 		case reflect.Slice:
 			if fieldType.Type.Elem().Kind() == reflect.String {
 				values := strings.Split(fieldType.Tag.Get("default"), ",")
@@ -78,6 +86,11 @@ func Convert(src interface{}, prefixEnv string) []cli.Flag {
 	}
 	return flags
 }
+func int64FromString(s string) int64 {
+	val, _ := strconv.ParseInt(s, 10, 64)
+	return val
+}
+
 func intFromString(s string) int {
 	val, _ := strconv.Atoi(s)
 	return val
