@@ -44,115 +44,46 @@ func GetRepo() Repository {
 	}
 	return repo1
 }
+
 func TestListUsers(t *testing.T) {
-	repo := GetRepo()
+	var repo Repository = GetRepo()
 	type args struct {
 		ctx context.Context
 		ex  gentity.Extend[*entities.User]
 	}
-	type testcase struct {
-		name    string
-		args    args
-		want    []entities.User
-		wantErr error
-	}
-
-	tests := []testcase{
-		{
-			name: "test1",
-			args: args{
-				ctx: context.Background(),
-				ex: gentity.Extend[*entities.User]{
-					Entity: &entities.User{
-						ID: "633b12448f01dad0448d2afd",
-					},
-				},
-			},
-			wantErr: nil,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := repo.ListUsers(tt.args.ctx, tt.args.ex)
-			if err != tt.wantErr {
-				t.Errorf("ListUsers() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			assert.NotNil(t, got)
-		})
-	}
-}
-
-func TestInsertUser(t *testing.T) {
-	repo := GetRepo()
-	type args struct {
-		ctx context.Context
-		ex  gentity.Extend[*entities.User]
+	type want struct {
+		err     error
+		wantErr bool
 	}
 	type testcase struct {
-		name    string
-		args    args
-		want    entities.User
-		wantErr error
+		name string
+		repo Repository
+		args args
+		want want
 	}
-
-	tests := []testcase{
+	testcases := []testcase{
 		{
 			name: "test1",
+			repo: repo,
 			args: args{
 				ctx: context.Background(),
-				ex: gentity.WithExtend(&entities.User{
-					Name: "test2",
-				}, nil, gentity.Debug()),
+				ex:  gentity.Extend[*entities.User]{},
 			},
-			wantErr: nil,
+			want: want{
+				wantErr: false,
+			},
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := repo.InsertUser(tt.args.ctx, tt.args.ex)
-			if err != tt.wantErr {
-				t.Errorf("InsertUser() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			assert.NotNil(t, got)
-		})
-	}
-}
 
-func TestGetUserById(t *testing.T) {
-	repo := GetRepo()
-	assert.NotNil(t, repo)
-	type args struct {
-		ctx context.Context
-		id  string
-	}
-	type testcase struct {
-		name    string
-		args    args
-		want    entities.User
-		wantErr error
-	}
-
-	tests := []testcase{
-		{
-			name: "test1",
-			args: args{
-				ctx: context.Background(),
-				id:  "633b12448f01dad0448d2afd",
-			},
-			wantErr: nil,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := repo.GetUserById(tt.args.ctx, tt.args.id)
-			if err != tt.wantErr {
-				t.Errorf("GetUserById() error = %v, wantErr %v", err, tt.wantErr)
-				return
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			ret, err := tc.repo.ListUsers(tc.args.ctx, tc.args.ex)
+			if tc.want.wantErr {
+				assert.EqualError(t, err, tc.want.err.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, ret)
 			}
-			assert.NotNil(t, got)
-			assert.Equal(t, got.ID, tt.args.id)
 		})
 	}
 }

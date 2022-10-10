@@ -12,6 +12,9 @@ import (
 
 func getUserFilter(ex gentity.Extend[*entities.User]) (interface{}, error) {
 	filter := bson.M{}
+	if ex.Entity == nil {
+		return filter, nil
+	}
 	if ex.Entity.ID != "" {
 		oid, err := primitive.ObjectIDFromHex(ex.Entity.ID)
 		if err != nil {

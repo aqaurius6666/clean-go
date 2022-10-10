@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/aqaurius6666/clean-go/internal/config"
-	"github.com/aqaurius6666/clean-go/internal/wire"
 	"github.com/aqaurius6666/clean-go/pkg/parsecli"
 	"github.com/urfave/cli/v2"
 )
@@ -32,7 +31,7 @@ func serve(cfg config.AppConfig) error {
 	var err error
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	app, err := wire.BuildApp(ctx, cfg)
+	app, err := BuildApp(ctx, cfg)
 	if err != nil {
 		return err
 	}
