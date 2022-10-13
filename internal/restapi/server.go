@@ -6,6 +6,7 @@ import (
 	"github.com/aqaurius6666/clean-go/pkg/swagger"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 type Server interface {
@@ -26,7 +27,7 @@ func (s *RestAPIServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *RestAPIServer) RegisterEndpoint() {
 	s.G.Use(gin.Recovery())
 	s.G.Use(s.Middleware.Logger)
-
+	s.G.Use(otelgin.Middleware("clean-go"))
 	s.G.GET("/swagger/*any", swagger.SwaggerHandler("api.swagger.json"))
 
 	authG := s.G.Group("/auth")

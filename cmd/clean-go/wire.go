@@ -17,11 +17,13 @@ import (
 	"github.com/aqaurius6666/clean-go/internal/usecases"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
+	"github.com/sirupsen/logrus"
 )
 
 type App struct {
 	RestApiServer restapi.Server
 	Migrator      usecases.Migrator
+	Logger        *logrus.Logger
 }
 
 // wire provider set

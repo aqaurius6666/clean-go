@@ -3,11 +3,12 @@ package config
 type AppConfig struct {
 	Version string `cli:"version" env:"VERSION" default:"0.1.0"`
 	Log     LogConfig
-	HTTP    HTTPConfig
+	Http    HTTPConfig
 	Db      DBConfig
 	Auth    AuthConfig
-	ES      ESConfig
+	Es      ESConfig
 	Event   EventConfig
+	Otel    OTELConfig
 }
 
 type LogConfig struct {
@@ -27,6 +28,13 @@ type DBConfig struct {
 	Name   string `cli:"db-name" env:"NAME" default:"postgres"`
 	Scheme string `cli:"db-scheme" env:"SCHEME" default:"postgres"`
 	Query  string `cli:"db-query" env:"QUERY" default:"sslmode=disable"`
+}
+
+type OTELConfig struct {
+	Enabled       bool   `cli:"otel-enabled" env:"ENABLED" default:"false"`
+	CollectorAddr string `cli:"otel-collector-addr" env:"COLLECTOR_ADDR" default:"localhost:4317"`
+	ID            int64  `cli:"otel-id" env:"ID" default:"1"`
+	ServiceName   string `cli:"otel-service-name" env:"SERVICE_NAME" default:"clean-go"`
 }
 
 type AuthConfig struct {

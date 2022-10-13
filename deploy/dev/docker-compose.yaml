@@ -3,13 +3,25 @@ networks:
   cleango:
     name: cleango
 services:
-  # cleango:
-  #   build:
-  #     context: .
-  #   env_file:
-  #     - .env
-  #   networks:
-  #     - cleango
+  cleango:
+    build:
+      context: ../..
+    environment:
+      - DEBUG=${DEBUG}
+      - DEBUG_PORT=${DEBUG_PORT}
+    env_file:
+      - .env
+    command: 
+      - air
+
+    volumes:
+      - ../..:/app
+      - $HOME/go/pkg/mod:/go/pkg/mod
+    ports:
+      - ${DEBUG_PORT}:${DEBUG_PORT}
+      - 8080:8080
+    networks:
+      - cleango
   cassandra:
     image: bitnami/cassandra:latest
     ports: 
@@ -26,6 +38,8 @@ services:
       POSTGRES_DB: cleango
     ports:
       - 5432:5432
+    networks:
+      - cleango
   mongodb:
     image: mongo:latest
     ports:
@@ -34,6 +48,8 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=cleango
       - MONGO_INITDB_ROOT_PASSWORD=cleango
       - MONGO_INITDB_DATABASE=cleango
+    networks:
+      - cleango
   eventstore:
     image: eventstore/eventstore:21.10.8-buster-slim
     ports:

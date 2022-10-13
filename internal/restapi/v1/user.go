@@ -47,7 +47,7 @@ func (s *Handler) HandleMePut(g *gin.Context) {
 	}
 	response.Response200(g, &apipb.MePutResponse{
 		Id:   req.XId,
-		Name: u.Name,	
+		Name: u.Name,
 	})
 
 }

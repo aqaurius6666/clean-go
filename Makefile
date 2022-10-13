@@ -1,3 +1,5 @@
+APP_NAME := clean-go
+
 gen-mock:
 	@ which mockery > /dev/null || (echo \
 	"mockery is not installed. Please install it first:\n \
@@ -7,7 +9,18 @@ go install github.com/vektra/mockery/v2@latest" \
 	@ mockery --all --outpkg mocks 
 
 build:
-	@ go build -o bin/$(APP_NAME) cmd/$(APP_NAME)/main.go
+	@ if [ -z "$(DEBUG)" ]; then \
+		go build -buildvcs=false -o /tmp/$(APP_NAME) ./cmd/$(APP_NAME); \
+    else \
+       	go build -gcflags "all=-N -l" -buildvcs=false -o /tmp/$(APP_NAME) ./cmd/$(APP_NAME); \
+    fi
+
+serve: build
+	@ if [ -z "$(DEBUG)" ]; then \
+		/tmp/$(APP_NAME) serve; \
+    else \
+       	dlv --listen=0.0.0.0:$$DEBUG_PORT --accept-multiclient --headless=true --api-version=2 exec /tmp/$(APP_NAME) -- serve; \
+    fi
 
 gen-proto:
 	@ which buf > /dev/null || (echo \
@@ -24,7 +37,19 @@ run:
 	@ export $(cat deploy/dev/.env | xargs) && go run ./... serve
 
 dev-recreate:
-	@ docker-compose -f deploy/dev/docker-compose.yaml up -d --force-recreate --build
+	@ export DEBUG=false && \
+	export DEBUG_PORT=2345 && \
+	docker-compose -f deploy/dev/docker-compose.yaml up -d --force-recreate --build
+
+dev-recreate-debug: 
+	@ export DEBUG=true && \
+	export DEBUG_PORT=2345 && \
+	docker-compose -f deploy/dev/docker-compose.yaml up -d --force-recreate --build
 
 kafka:
 	@ docker-compose -f deploy/dev/kafka.docker-compose.yaml up -d
+
+logs:
+	@ export DEBUG=false && \
+	export DEBUG_PORT=2345 && \
+	docker-compose -f deploy/dev/docker-compose.yaml logs -f cleango 
