@@ -329,19 +329,15 @@ func (m *Pagination) validate(all bool) error {
 
 	}
 
-	if m.GetLimit() != 0 {
-
-		if m.GetLimit() < 0 {
-			err := PaginationValidationError{
-				field:  "Limit",
-				reason: "value must be greater than or equal to 0",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
+	if val := m.GetLimit(); val <= 0 || val > 50 {
+		err := PaginationValidationError{
+			field:  "Limit",
+			reason: "value must be inside range (0, 50]",
 		}
-
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	// no validation rules for Total

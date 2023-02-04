@@ -5,7 +5,6 @@ import (
 
 	"github.com/aqaurius6666/clean-go/internal/entities"
 	"github.com/aqaurius6666/clean-go/internal/var/e"
-	"github.com/aqaurius6666/clean-go/pkg/gentity"
 	"github.com/pkg/errors"
 )
 
@@ -22,11 +21,10 @@ func (s *UsecasesService) CreateReact(ctx context.Context, userId string, postId
 	if err != nil {
 		return nil, errors.New(e.ErrPostNotFound)
 	}
-	react, err := s.Repo.InsertReact(ctx, gentity.Extend[*entities.React]{
-		Entity: &entities.React{
-			UserID: userId,
-			PostID: postId,
-		}})
+	react, err := s.Repo.InsertReact(ctx, &entities.React{
+		UserID: userId,
+		PostID: postId,
+	})
 	if err != nil {
 		return nil, err
 	}

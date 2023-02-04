@@ -4,7 +4,6 @@ import (
 	"github.com/aqaurius6666/clean-go/internal/entities"
 	"github.com/aqaurius6666/clean-go/pkg/proto/apipb"
 	"github.com/aqaurius6666/clean-go/pkg/proto/entitypb"
-	"github.com/aqaurius6666/clean-go/pkg/ptr"
 	"github.com/aqaurius6666/clean-go/pkg/response"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +28,7 @@ func (s *Handler) HandlePostsMeGet(g *gin.Context) {
 		return
 	}
 	req.Pagination.Total = total
-	posts, err := s.Usecase.ListPosts(ctx, req.XId, ptr.PtrAnyNilIfZero(req.Pagination.Limit), ptr.PtrAnyNilIfZero(req.Pagination.Offset))
+	posts, err := s.Usecase.ListPosts(ctx, req.XId, req.Pagination.Limit, req.Pagination.Offset)
 	if err != nil {
 		response.Response400(g, err)
 		return

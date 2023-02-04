@@ -4,25 +4,43 @@ import (
 	"context"
 
 	"github.com/aqaurius6666/clean-go/internal/entities"
-	"github.com/aqaurius6666/clean-go/pkg/gentity"
+	"github.com/aqaurius6666/clean-go/internal/repositories/orm/gormgen"
 )
 
+func (s *ORMRepository) InsertUser(ctx context.Context, user *entities.User) (*entities.User, error) {
+	userQ := gormgen.User
+	err := userQ.WithContext(ctx).Create(user)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (s *ORMRepository) GetUserByEmailAndPassword(ctx context.Context, email string, password string) (*entities.User, error) {
+	userQ := gormgen.User
+	user, err := userQ.WithContext(ctx).
+		Where(userQ.Email.Eq(email), userQ.Password.Eq(password)).First()
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+
+}
+
 func (s *ORMRepository) GetUserById(ctx context.Context, id string) (*entities.User, error) {
-	return gentity.GetEntityById[*entities.User](ctx, s.DB, id)
+	userQ := gormgen.User
+	user, err := userQ.WithContext(ctx).Where(userQ.ID.Eq(id)).First()
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
-func (s *ORMRepository) ListUsers(ctx context.Context, ex gentity.Extend[*entities.User]) ([]*entities.User, error) {
-	return gentity.ListEntities(ctx, s.DB, ex)
-}
-
-func (s *ORMRepository) InsertUser(ctx context.Context, ex gentity.Extend[*entities.User]) (*entities.User, error) {
-	return gentity.InsertEntity(ctx, s.DB, ex)
-}
-
-func (s *ORMRepository) SelectUser(ctx context.Context, ex gentity.Extend[*entities.User]) (*entities.User, error) {
-	return gentity.GetEntity(ctx, s.DB, ex)
-}
-
-func (s *ORMRepository) UpdateUser(ctx context.Context, ex gentity.Extend[*entities.User], v *entities.User) (*entities.User, error) {
-	return gentity.UpdateEntity(ctx, s.DB, ex, v)
+func (s *ORMRepository) UpdateUser(ctx context.Context, id string, user *entities.User) (*entities.User, error) {
+	userQ := gormgen.User
+	_, err := userQ.WithContext(ctx).Where(userQ.ID.Eq(id)).Updates(user)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }

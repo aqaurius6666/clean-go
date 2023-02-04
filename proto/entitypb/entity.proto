@@ -53,8 +53,8 @@ message Pagination {
     ];
     int32 limit = 2 [
         (validate.rules).int32 = {
-            gte: 0
-            ignore_empty: true
+            gt: 0,
+            lte: 50
         },
         (gogoproto.moretags) = "form:\"limit\"",
         (gogoproto.casttype) = "int",

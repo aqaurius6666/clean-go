@@ -7,6 +7,7 @@ import (
 
 	"github.com/aqaurius6666/clean-go/internal/config"
 	"github.com/aqaurius6666/clean-go/internal/entities"
+	"github.com/aqaurius6666/clean-go/internal/repositories/orm/gormgen"
 	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -15,6 +16,8 @@ import (
 type ORMRepository struct {
 	DB *gorm.DB
 }
+
+// var _ usecases.Repository = (*ORMRepository)(nil)
 
 func ConnectGorm(cfg config.DBConfig) (*gorm.DB, error) {
 	gormOpts := []gorm.Option{
@@ -40,11 +43,15 @@ func ConnectGorm(cfg config.DBConfig) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if cfg.OTELEnabled {
 		if err := db.Use(otelgorm.NewPlugin()); err != nil {
 			return nil, err
 		}
 	}
+
+	gormgen.SetDefault(db)
+
 	return db, nil
 }
 

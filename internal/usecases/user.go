@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/aqaurius6666/clean-go/internal/entities"
-	"github.com/aqaurius6666/clean-go/pkg/gentity"
 )
 
 type UserUsecases interface {
@@ -21,9 +20,5 @@ func (s *UsecasesService) GetUser(ctx context.Context, id string) (*entities.Use
 func (s *UsecasesService) UpdateUser(ctx context.Context, id string, user *entities.User) (*entities.User, error) {
 	ctx, span := s.TraceProvider.Tracer(pkgName).Start(ctx, "UsecasesService.UpdateUser")
 	defer span.End()
-	return s.Repo.UpdateUser(ctx, gentity.Extend[*entities.User]{
-		Entity: &entities.User{
-			ID: id,
-		},
-	}, user)
+	return s.Repo.UpdateUser(ctx, id, user)
 }

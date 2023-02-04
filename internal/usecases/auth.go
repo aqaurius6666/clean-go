@@ -6,7 +6,6 @@ import (
 
 	"github.com/aqaurius6666/clean-go/internal/entities"
 	"github.com/aqaurius6666/clean-go/internal/var/e"
-	"github.com/aqaurius6666/clean-go/pkg/gentity"
 	"github.com/aqaurius6666/clean-go/pkg/jwt"
 	"github.com/pkg/errors"
 )
@@ -21,11 +20,11 @@ type AuthUsecases interface {
 func (s *UsecasesService) RegisterNewUser(ctx context.Context, email string, password string, name string) (string, error) {
 	ctx, span := s.TraceProvider.Tracer(pkgName).Start(ctx, "UsecasesService.RegisterNewUser")
 	defer span.End()
-	u, err := s.Repo.InsertUser(ctx, gentity.WithExtend(&entities.User{
+	u, err := s.Repo.InsertUser(ctx, &entities.User{
 		Email:    email,
 		Password: password,
 		Name:     name,
-	}, nil))
+	})
 	if err != nil {
 		return "", errors.New(e.ErrEmailExisted)
 	}
@@ -35,10 +34,7 @@ func (s *UsecasesService) RegisterNewUser(ctx context.Context, email string, pas
 func (s *UsecasesService) VerifyUserCredential(ctx context.Context, email string, password string) (string, error) {
 	ctx, span := s.TraceProvider.Tracer(pkgName).Start(ctx, "UsecasesService.VerifyUserCredential")
 	defer span.End()
-	u, err := s.Repo.SelectUser(ctx, gentity.WithExtend(&entities.User{
-		Email:    email,
-		Password: password,
-	}, nil))
+	u, err := s.Repo.GetUserByEmailAndPassword(ctx, email, password)
 	if err != nil {
 		return "", errors.WithMessage(err, e.ErrCredentialWrong)
 	}

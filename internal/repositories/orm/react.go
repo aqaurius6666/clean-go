@@ -4,17 +4,14 @@ import (
 	"context"
 
 	"github.com/aqaurius6666/clean-go/internal/entities"
-	"github.com/aqaurius6666/clean-go/pkg/gentity"
+	"github.com/aqaurius6666/clean-go/internal/repositories/orm/gormgen"
 )
 
-func (s *ORMRepository) InsertReact(ctx context.Context, ex gentity.Extend[*entities.React]) (*entities.React, error) {
-	return gentity.InsertEntity(ctx, s.DB, ex)
-}
-
-func (s *ORMRepository) SelectReact(ctx context.Context, ex gentity.Extend[*entities.React]) (*entities.React, error) {
-	return gentity.GetEntity(ctx, s.DB, ex)
-}
-
-func (s *ORMRepository) ListReacts(ctx context.Context, ex gentity.Extend[*entities.React]) ([]*entities.React, error) {
-	return gentity.ListEntities(ctx, s.DB, ex)
+func (s *ORMRepository) InsertReact(ctx context.Context, react *entities.React) (*entities.React, error) {
+	reactQ := gormgen.React
+	err := reactQ.WithContext(ctx).Create(react)
+	if err != nil {
+		return nil, err
+	}
+	return react, nil
 }
