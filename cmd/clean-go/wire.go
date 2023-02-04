@@ -10,7 +10,6 @@ import (
 	"github.com/aqaurius6666/clean-go/internal/entities"
 	"github.com/aqaurius6666/clean-go/internal/generics"
 	"github.com/aqaurius6666/clean-go/internal/repositories"
-	"github.com/aqaurius6666/clean-go/internal/repositories/odm"
 	"github.com/aqaurius6666/clean-go/internal/repositories/orm"
 	"github.com/aqaurius6666/clean-go/internal/restapi"
 	v1 "github.com/aqaurius6666/clean-go/internal/restapi/v1"
@@ -62,9 +61,9 @@ var (
 
 // interface constraints
 var (
-	_ usecases.Usecases                          = (*usecases.UsecasesService)(nil)
-	_ usecases.Repository                        = (*orm.ORMRepository)(nil)
-	_ usecases.Repository                        = (*odm.ODMRepository)(nil)
+	_ usecases.Usecases   = (*usecases.UsecasesService)(nil)
+	_ usecases.Repository = (*orm.ORMRepository)(nil)
+	// _ usecases.Repository                        = (*odm.ODMRepository)(nil)
 	_ generics.GenericRepository[*entities.User] = (*generics.ORMGenericRepository[*entities.User])(nil)
 	_ usecases.Migrator                          = (*orm.ORMRepository)(nil)
 	_ restapi.Server                             = (*restapi.RestAPIServer)(nil)
@@ -72,12 +71,11 @@ var (
 	_ restapi.Middleware                         = (*v1.Middleware)(nil)
 )
 
-func BuildApp(ctx context.Context, cfg config.AppConfig) (*App, error) {
-
+func BuildApp(ctx context.Context, cfg config.AppConfig, manualCfg ManualConfig) (*App, error) {
 	wire.Build(
-		wire.FieldsOf(&cfg, "Db", "Auth", "Log"),
+		wire.FieldsOf(&cfg, "Db", "Auth"),
+		wire.FieldsOf(&manualCfg, "Tracer", "Logger"),
 		wire.Struct(new(App), "*"),
-		config.NewLogger,
 		RestSet,
 		UsecaseSet,
 		RepositorySet,

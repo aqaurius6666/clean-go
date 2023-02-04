@@ -8,6 +8,7 @@ import (
 	"github.com/aqaurius6666/clean-go/pkg/jwt"
 	"github.com/aqaurius6666/clean-go/pkg/response"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,7 +21,7 @@ func (s *Middleware) Token(c *gin.Context) {
 	ctx := c.Request.Context()
 	authStr := c.GetHeader("Authorization")
 	if !strings.Contains(authStr, "Bearer ") {
-		response.Response401(c, e.ErrInvalidToken)
+		response.Response401(c, errors.New(e.ErrInvalidToken))
 		return
 	}
 

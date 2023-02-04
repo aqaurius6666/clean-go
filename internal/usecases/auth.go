@@ -8,6 +8,7 @@ import (
 	"github.com/aqaurius6666/clean-go/internal/var/e"
 	"github.com/aqaurius6666/clean-go/pkg/gentity"
 	"github.com/aqaurius6666/clean-go/pkg/jwt"
+	"github.com/pkg/errors"
 )
 
 type AuthUsecases interface {
@@ -18,29 +19,35 @@ type AuthUsecases interface {
 }
 
 func (s *UsecasesService) RegisterNewUser(ctx context.Context, email string, password string, name string) (string, error) {
+	ctx, span := s.TraceProvider.Tracer(pkgName).Start(ctx, "UsecasesService.RegisterNewUser")
+	defer span.End()
 	u, err := s.Repo.InsertUser(ctx, gentity.WithExtend(&entities.User{
 		Email:    email,
 		Password: password,
 		Name:     name,
 	}, nil))
 	if err != nil {
-		return "", e.ErrEmailExisted
+		return "", errors.New(e.ErrEmailExisted)
 	}
 	return u.ID, nil
 }
 
 func (s *UsecasesService) VerifyUserCredential(ctx context.Context, email string, password string) (string, error) {
+	ctx, span := s.TraceProvider.Tracer(pkgName).Start(ctx, "UsecasesService.VerifyUserCredential")
+	defer span.End()
 	u, err := s.Repo.SelectUser(ctx, gentity.WithExtend(&entities.User{
 		Email:    email,
 		Password: password,
 	}, nil))
 	if err != nil {
-		return "", e.ErrCredentialWrong
+		return "", errors.WithMessage(err, e.ErrCredentialWrong)
 	}
 	return u.ID, nil
 }
 
 func (s *UsecasesService) IssueToken(ctx context.Context, id string) (accessToken string, refreshToken string, expAt int64, err error) {
+	ctx, span := s.TraceProvider.Tracer(pkgName).Start(ctx, "UsecasesService.IssueToken")
+	defer span.End()
 	expTime := time.Now().Add(time.Duration(s.AuthConfig.ExpireDuration) * time.Second)
 	access, err := jwt.IssueJWT(s.AuthConfig.Secret, id, jwt.AccessTokenType, expTime)
 	if err != nil {
@@ -54,12 +61,14 @@ func (s *UsecasesService) IssueToken(ctx context.Context, id string) (accessToke
 }
 
 func (s *UsecasesService) VerifyToken(ctx context.Context, token string, tokenType jwt.TokenType) (string, error) {
+	ctx, span := s.TraceProvider.Tracer(pkgName).Start(ctx, "UsecasesService.VerifyToken")
+	defer span.End()
 	id, _tokenType, err := jwt.VerifyJWT(s.AuthConfig.Secret, token)
 	if err != nil {
-		return "", err
+		return "", errors.WithStack(err)
 	}
 	if _tokenType != tokenType {
-		return "", e.ErrInvalidToken
+		return "", errors.New(e.ErrInvalidToken)
 	}
 	return id, nil
 }

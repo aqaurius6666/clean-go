@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package proto.entitypb.v1;
+package proto.entitypb;
 
-option go_package = "github.com/aqaurius6666/clean-go/pkg/proto/entitypb/v1;entitypb";
+option go_package = "github.com/aqaurius6666/clean-go/pkg/proto/entitypb;entitypb";
 import "validate/validate.proto";
 import "gogoproto/gogo.proto";
 

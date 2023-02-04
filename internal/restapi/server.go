@@ -42,5 +42,7 @@ func (s *RestAPIServer) RegisterEndpoint() {
 	postG := s.G.Group("/posts")
 	postG.POST("", s.Middleware.Token, s.Handler.HandlePostsPost)
 	postG.GET("/me", s.Middleware.Token, s.Handler.HandlePostsMeGet)
+	postG.POST("/:postId/like", s.Middleware.Token, s.Handler.HandlePostsLikePost)
+	postG.POST("/:postId/dislike", s.Middleware.Token, s.Handler.HandlePostsDislikePost)
 
 }

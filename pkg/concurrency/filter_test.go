@@ -10,7 +10,8 @@ func TestFilterInt(t *testing.T) {
 	input := []int{1, 2, 3, 4}
 	inputChan := make(chan int, len(input))
 	defer close(inputChan)
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
 	predicate := func(value int) bool {
 		return value%2 == 0
 	}

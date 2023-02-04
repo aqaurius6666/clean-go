@@ -1,4 +1,27 @@
-APP_NAME := clean-go
+ifeq ($(APP_NAME),)
+	APP_NAME := clean-go
+endif
+ifeq ($(DEBUG),)
+	DEBUG := false
+endif
+export DEBUG
+export DEBUG_PORT=2345
+
+build_tags := jsoniter
+
+up: dev-recreate logs
+
+install: 
+	@ go mod tidy
+	@ go install github.com/google/wire/cmd/wire@latest
+	@ go install github.com/bufbuild/buf/cmd/buf@latest
+	@ go install github.com/envoyproxy/protoc-gen-validate/cmd/protoc-gen-validate-go@latest
+	@ go install github.com/cosmos/gogoproto/protoc-gen-gogo@latest
+	@ go install github.com/cosmos/gogoproto/protoc-gen-gogofast@latest
+
+dev-recreate:
+	@ docker-compose -f deploy/dev/docker-compose.yaml up -d
+	@ docker-compose -f deploy/dev/docker-compose.yaml up -d --force-recreate --build $(APP_NAME)
 
 gen-mock:
 	@ which mockery > /dev/null || (echo \
@@ -9,18 +32,22 @@ go install github.com/vektra/mockery/v2@latest" \
 	@ mockery --all --outpkg mocks 
 
 build:
-	@ if [ -z "$(DEBUG)" ]; then \
-		go build -buildvcs=false -o /tmp/$(APP_NAME) ./cmd/$(APP_NAME); \
-    else \
-       	go build -gcflags "all=-N -l" -buildvcs=false -o /tmp/$(APP_NAME) ./cmd/$(APP_NAME); \
-    fi
+ifeq ($(DEBUG),true)
+	@ go build -tags=${build_tags} -gcflags "all=-N -l" -buildvcs=false -o /tmp/$(APP_NAME) ./cmd/$(APP_NAME)
+else
+	@ go build -tags=${build_tags} -buildvcs=false -o /tmp/$(APP_NAME) ./cmd/$(APP_NAME)
+endif
 
 serve: build
-	@ if [ -z "$(DEBUG)" ]; then \
-		/tmp/$(APP_NAME) serve; \
-    else \
-       	dlv --listen=0.0.0.0:$$DEBUG_PORT --accept-multiclient --headless=true --api-version=2 exec /tmp/$(APP_NAME) -- serve; \
-    fi
+ifeq ($(DEBUG),true)
+	@ dlv --listen=0.0.0.0:$$DEBUG_PORT --accept-multiclient --headless=true --api-version=2 exec /tmp/$(APP_NAME) -- serve
+else
+	@ /tmp/$(APP_NAME) serve
+endif
+
+down:
+	@ docker-compose -f deploy/dev/docker-compose.yaml stop
+	@ docker-compose -f deploy/dev/monitor.docker-compose.yaml stop
 
 gen-proto:
 	@ which buf > /dev/null || (echo \
@@ -29,27 +56,21 @@ go install github.com/bufbuild/buf/cmd/buf@latest" \
 	 && exit 1)
 	
 	@ buf generate --template buf.gen.yaml
+	@ go generate ./pkg/swagger
 
 wire:
-	@ wire internal/...
+	@ wire ./internal/...
+	@ wire ./cmd/...
 
 run:
-	@ export $(cat deploy/dev/.env | xargs) && go run ./... serve
+	@ export $(grep -v '^#' deploy/dev/.env | xargs) && go run ./... serve
 
-dev-recreate:
-	@ export DEBUG=false && \
-	export DEBUG_PORT=2345 && \
-	docker-compose -f deploy/dev/docker-compose.yaml up -d --force-recreate --build
-
-dev-recreate-debug: 
-	@ export DEBUG=true && \
-	export DEBUG_PORT=2345 && \
-	docker-compose -f deploy/dev/docker-compose.yaml up -d --force-recreate --build
 
 kafka:
 	@ docker-compose -f deploy/dev/kafka.docker-compose.yaml up -d
 
+monitor:
+	@ docker-compose -f deploy/dev/monitor.docker-compose.yaml up -d
+
 logs:
-	@ export DEBUG=false && \
-	export DEBUG_PORT=2345 && \
-	docker-compose -f deploy/dev/docker-compose.yaml logs -f cleango 
+	@ docker-compose -f deploy/dev/docker-compose.yaml logs -f $(APP_NAME) 

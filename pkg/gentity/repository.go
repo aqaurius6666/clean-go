@@ -44,7 +44,7 @@ func ApplyGorm[T E](db *gorm.DB, ext Extend[T]) *gorm.DB {
 func ListEntities[T E](ctx context.Context, db *gorm.DB, ext Extend[T]) ([]T, error) {
 	ret := make([]T, 0)
 	db = ApplyGorm(db, ext)
-	if err := db.WithContext(ctx).Find(&ret).Error; err != nil {
+	if err := db.WithContext(ctx).Where(ext.Entity).Find(&ret).Error; err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -53,7 +53,7 @@ func ListEntities[T E](ctx context.Context, db *gorm.DB, ext Extend[T]) ([]T, er
 func GetEntity[T E](ctx context.Context, db *gorm.DB, ext Extend[T]) (T, error) {
 	var ret T
 	db = ApplyGorm(db, ext)
-	if err := db.WithContext(ctx).First(&ret).Error; err != nil {
+	if err := db.WithContext(ctx).Where(ext.Entity).First(&ret).Error; err != nil {
 		return ret, err
 	}
 	return ret, nil

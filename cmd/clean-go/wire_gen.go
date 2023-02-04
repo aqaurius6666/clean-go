@@ -12,7 +12,6 @@ import (
 	"github.com/aqaurius6666/clean-go/internal/entities"
 	"github.com/aqaurius6666/clean-go/internal/generics"
 	"github.com/aqaurius6666/clean-go/internal/repositories"
-	"github.com/aqaurius6666/clean-go/internal/repositories/odm"
 	"github.com/aqaurius6666/clean-go/internal/repositories/orm"
 	"github.com/aqaurius6666/clean-go/internal/restapi"
 	"github.com/aqaurius6666/clean-go/internal/restapi/v1"
@@ -24,10 +23,9 @@ import (
 
 // Injectors from wire.go:
 
-func BuildApp(ctx context.Context, cfg config.AppConfig) (*App, error) {
+func BuildApp(ctx context.Context, cfg config.AppConfig, manualCfg ManualConfig) (*App, error) {
 	engine := gin.New()
-	logConfig := cfg.Log
-	logger := config.NewLogger(logConfig)
+	logger := manualCfg.Logger
 	authConfig := cfg.Auth
 	dbConfig := cfg.Db
 	repositoryImpl, err := repositories.BuildRepository(logger, dbConfig)
@@ -35,10 +33,12 @@ func BuildApp(ctx context.Context, cfg config.AppConfig) (*App, error) {
 		return nil, err
 	}
 	repository := CastRepository(repositoryImpl)
+	tracerProvider := manualCfg.Tracer
 	usecasesService := &usecases.UsecasesService{
-		Logger:     logger,
-		AuthConfig: authConfig,
-		Repo:       repository,
+		Logger:        logger,
+		AuthConfig:    authConfig,
+		Repo:          repository,
+		TraceProvider: tracerProvider,
 	}
 	handler := &v1.Handler{
 		Usecase: usecasesService,
@@ -94,9 +94,9 @@ var (
 
 // interface constraints
 var (
-	_ usecases.Usecases                          = (*usecases.UsecasesService)(nil)
-	_ usecases.Repository                        = (*orm.ORMRepository)(nil)
-	_ usecases.Repository                        = (*odm.ODMRepository)(nil)
+	_ usecases.Usecases   = (*usecases.UsecasesService)(nil)
+	_ usecases.Repository = (*orm.ORMRepository)(nil)
+	// _ usecases.Repository                        = (*odm.ODMRepository)(nil)
 	_ generics.GenericRepository[*entities.User] = (*generics.ORMGenericRepository[*entities.User])(nil)
 	_ usecases.Migrator                          = (*orm.ORMRepository)(nil)
 	_ restapi.Server                             = (*restapi.RestAPIServer)(nil)

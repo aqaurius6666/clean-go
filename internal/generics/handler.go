@@ -1,17 +1,19 @@
 package generics
 
 import (
-	"encoding/json"
 	"reflect"
 
 	"github.com/aqaurius6666/clean-go/pkg/gentity"
-	"github.com/aqaurius6666/clean-go/pkg/proto/genericpb/v1"
+	"github.com/aqaurius6666/clean-go/pkg/proto/genericpb"
 	"github.com/aqaurius6666/clean-go/pkg/response"
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/gogo/protobuf/proto"
 	"github.com/google/uuid"
+	jsoniter "github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type GenericEnttiy interface {
 	Validate() error

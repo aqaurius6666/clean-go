@@ -13,6 +13,7 @@ import (
 	"github.com/aqaurius6666/clean-go/internal/config"
 	"github.com/aqaurius6666/clean-go/pkg/otel"
 	"github.com/aqaurius6666/clean-go/pkg/parsecli"
+	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
 )
 
@@ -27,6 +28,7 @@ func buildServeCmd() *cli.Command {
 			if err != nil {
 				return err
 			}
+			cfg = cfg.Modify()
 			return serve(cfg)
 		},
 	}
@@ -37,35 +39,20 @@ func serve(cfg config.AppConfig) error {
 	var err error
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	app, err := BuildApp(ctx, cfg)
+
+	manualCfg, err := manualConfig(ctx, cfg)
 	if err != nil {
 		return err
+	}
+	app, err := BuildApp(ctx, cfg, manualCfg)
+	if err != nil || app == nil {
+		return errors.New("buildApp failed")
 	}
 	app.Logger.Info("Initialize application successfully")
 	if err = app.Migrator.Migrate(ctx); err != nil {
 		return err
 	}
 	app.Logger.Info("Migrate successfully")
-	if cfg.Otel.Enabled {
-		clearFunc, err := otel.InitOtel(ctx, otel.OtelOptions{
-			CollectorAddr:  cfg.Otel.CollectorAddr,
-			ID:             cfg.Otel.ID,
-			ServiceName:    cfg.Otel.ServiceName,
-			MetricPeriodic: 5 * time.Second,
-		})
-		app.Logger.Info("Initialize OTEL successfully")
-		defer func() {
-			clearCtx := context.Background()
-			clearCtx, cancel := context.WithTimeout(clearCtx, 5*time.Second)
-			defer cancel()
-			_ = clearFunc(clearCtx)
-		}()
-		if err != nil {
-			return err
-		}
-	} else {
-		app.Logger.Info("OTEL is disabled")
-	}
 
 	httpServer := &http.Server{
 		Addr:    fmt.Sprintf(":%s", cfg.Http.Port),
@@ -113,4 +100,27 @@ func serve(cfg config.AppConfig) error {
 			return nil
 		}
 	}
+}
+
+func manualConfig(ctx context.Context, cfg config.AppConfig) (manualCfg ManualConfig, err error) {
+	manualCfg.Logger = config.NewLogger(cfg.Log)
+	manualCfg.Tracer = otel.NoOpTracer
+
+	if cfg.Otel.Enabled {
+		_, err = otel.InitOtel(ctx, otel.OtelOptions{
+			CollectorAddr:  cfg.Otel.CollectorAddr,
+			ID:             cfg.Otel.ID,
+			ServiceName:    cfg.Otel.ServiceName,
+			MetricPeriodic: 5 * time.Second,
+		})
+		if err != nil {
+			return
+		}
+		manualCfg.Tracer = otel.TracerProvider(cfg.Otel.ServiceName)
+		manualCfg.Logger.Info("Initialize OTEL successfully")
+
+	} else {
+		manualCfg.Logger.Info("OTEL is disabled")
+	}
+	return
 }

@@ -12,6 +12,7 @@ import (
 type RepositoryImpl interface{}
 
 func BuildRepository(logger *logrus.Logger, cfg config.DBConfig) (RepositoryImpl, error) {
+
 	switch cfg.Scheme {
 	case "postgres":
 		return orm.BuildRepository(logger, cfg)

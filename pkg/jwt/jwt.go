@@ -35,7 +35,7 @@ func (s *MyClaims) Valid() error {
 		return errors.New("token expired")
 	}
 	if s.Iat > time.Now().Unix() {
-		return errors.New	("token not valid yet")
+		return errors.New("token not valid yet")
 	}
 	return nil
 }

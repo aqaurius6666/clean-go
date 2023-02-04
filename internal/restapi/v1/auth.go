@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/aqaurius6666/clean-go/pkg/jwt"
-	"github.com/aqaurius6666/clean-go/pkg/proto/apipb/v1"
+	"github.com/aqaurius6666/clean-go/pkg/proto/apipb"
 	"github.com/aqaurius6666/clean-go/pkg/response"
 	"github.com/gin-gonic/gin"
 )

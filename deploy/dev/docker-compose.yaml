@@ -3,9 +3,10 @@ networks:
   cleango:
     name: cleango
 services:
-  cleango:
+  clean-go:
     build:
       context: ../..
+      target: dev
     environment:
       - DEBUG=${DEBUG}
       - DEBUG_PORT=${DEBUG_PORT}
@@ -16,22 +17,23 @@ services:
 
     volumes:
       - ../..:/app
-      - $HOME/go/pkg/mod:/go/pkg/mod
+      - $HOME/go/pkg:/go/pkg
+      - gocache:/root/.cache/go-build
     ports:
       - ${DEBUG_PORT}:${DEBUG_PORT}
       - 8080:8080
     networks:
       - cleango
-  cassandra:
-    image: bitnami/cassandra:latest
-    ports: 
-      - 9042:9042
-    environment:
-       - CASSANDRA_PASSWORD=cleango
-       - CASSANDRA_USER=cleango
-       - CASSANDRA_PASSWORD_SEEDER=yes
+  # cassandra:
+  #   image: bitnami/cassandra:latest
+  #   ports: 
+  #     - 9042:9042
+  #   environment:
+  #      - CASSANDRA_PASSWORD=cleango
+  #      - CASSANDRA_USER=cleango
+  #      - CASSANDRA_PASSWORD_SEEDER=yes
   postgres:
-    image: postgres:alpine
+    image: postgres:13.7-alpine
     environment:
       POSTGRES_PASSWORD: cleango
       POSTGRES_USER: cleango
@@ -40,27 +42,29 @@ services:
       - 5432:5432
     networks:
       - cleango
-  mongodb:
-    image: mongo:latest
-    ports:
-      - 27017:27017
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=cleango
-      - MONGO_INITDB_ROOT_PASSWORD=cleango
-      - MONGO_INITDB_DATABASE=cleango
-    networks:
-      - cleango
-  eventstore:
-    image: eventstore/eventstore:21.10.8-buster-slim
-    ports:
-      - 2113:2113
-      - 1113:1113
-    environment:
-      - EVENTSTORE_CLUSTER_SIZE=1
-      - EVENTSTORE_RUN_PROJECTIONS=All
-      - EVENTSTORE_START_STANDARD_PROJECTIONS=true
-      - EVENTSTORE_EXT_TCP_PORT=1113
-      - EVENTSTORE_HTTP_PORT=2113
-      - EVENTSTORE_INSECURE=true
-      - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
-      - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
+  # mongodb:
+  #   image: mongo:latest
+  #   ports:
+  #     - 27017:27017
+  #   environment:
+  #     - MONGO_INITDB_ROOT_USERNAME=cleango
+  #     - MONGO_INITDB_ROOT_PASSWORD=cleango
+  #     - MONGO_INITDB_DATABASE=cleango
+  #   networks:
+  #     - cleango
+  # eventstore:
+  #   image: eventstore/eventstore:21.10.8-buster-slim
+  #   ports:
+  #     - 2113:2113
+  #     - 1113:1113
+  #   environment:
+  #     - EVENTSTORE_CLUSTER_SIZE=1
+  #     - EVENTSTORE_RUN_PROJECTIONS=All
+  #     - EVENTSTORE_START_STANDARD_PROJECTIONS=true
+  #     - EVENTSTORE_EXT_TCP_PORT=1113
+  #     - EVENTSTORE_HTTP_PORT=2113
+  #     - EVENTSTORE_INSECURE=true
+  #     - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
+  #     - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
+volumes:
+  gocache:

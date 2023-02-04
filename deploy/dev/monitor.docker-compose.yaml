@@ -1,0 +1,35 @@
+version: '3.7'
+networks:
+  cleango:
+    name: cleango
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector
+    command:
+      - --config=/etc/otel-collector-config.yaml
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    networks:
+      - cleango
+  jaeger:
+    image: jaegertracing/all-in-one
+    ports:
+      - 16686:16686
+    networks:
+      - cleango
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+    networks:
+      - cleango
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    networks:
+      - cleango

@@ -18,3 +18,6 @@ func (s *ORMRepository) ListPosts(ctx context.Context, ex gentity.Extend[*entiti
 func (s *ORMRepository) TotalPosts(ctx context.Context, ex gentity.Extend[*entities.Post]) (int64, error) {
 	return gentity.TotalEntity(ctx, s.DB, ex)
 }
+func (s *ORMRepository) GetPostById(ctx context.Context, id string) (*entities.Post, error) {
+	return gentity.GetEntityById[*entities.Post](ctx, s.DB, id)
+}

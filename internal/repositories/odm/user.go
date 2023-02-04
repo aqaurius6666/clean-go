@@ -6,6 +6,7 @@ import (
 	"github.com/aqaurius6666/clean-go/internal/entities"
 	"github.com/aqaurius6666/clean-go/internal/var/e"
 	"github.com/aqaurius6666/clean-go/pkg/gentity"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -105,7 +106,7 @@ func (s *ODMRepository) UpdateUser(ctx context.Context, ex gentity.Extend[*entit
 		return nil, err
 	}
 	if res.MatchedCount == 0 {
-		return nil, e.ErrInvalidOperation
+		return nil, errors.New(e.ErrInvalidOperation)
 	}
 	return v, nil
 }

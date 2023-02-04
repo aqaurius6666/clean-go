@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package proto.genericpb.v1;
+package proto.genericpb;
 
-option go_package = "github.com/aqaurius6666/clean-go/pkg/proto/genericpb/v1;genericpb";
+option go_package = "github.com/aqaurius6666/clean-go/pkg/proto/genericpb;genericpb";
 
 import "google/protobuf/any.proto";
 import "google/api/http.proto";

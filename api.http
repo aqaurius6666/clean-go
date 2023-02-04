@@ -1,8 +1,8 @@
 @host = http://localhost:8080
 @token = {{login.response.body.data.accessToken}}
 @refresh_token = {{login.response.body.data.refreshToken}}
-@email = aqaurius2@gmail.com
-@password = 123123
+@email = aqaurius213@gmail.com
+@password = 1231233231
 ###
 # @name login
 POST {{host}}/auth/login 
@@ -49,4 +49,12 @@ Authorization: Bearer {{token}}
 
 ###
 GET {{host}}/posts/me
+Authorization: Bearer {{token}}
+
+###
+POST {{host}}/posts/ce6d86c5-2164-471c-bf41-644b5e20893d/like
+Authorization: Bearer {{token}}
+
+###
+POST {{host}}/posts/ce6d86c5-2164-471c-bf41-644b5e20893d/dislike
 Authorization: Bearer {{token}}

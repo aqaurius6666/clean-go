@@ -22,4 +22,6 @@ type UserHandler interface {
 type PostHandler interface {
 	HandlePostsMeGet(*gin.Context)
 	HandlePostsPost(*gin.Context)
+	HandlePostsLikePost(*gin.Context)
+	HandlePostsDislikePost(*gin.Context)
 }

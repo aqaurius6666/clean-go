@@ -6,6 +6,7 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/trace"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -28,6 +29,8 @@ type OtelOptions struct {
 }
 
 func InitOtel(ctx context.Context, opts OtelOptions) (func(ctx context.Context) error, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 	conn, err := grpc.DialContext(ctx, opts.CollectorAddr, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	if err != nil {
 		return nil, err
@@ -63,6 +66,8 @@ func InitOtel(ctx context.Context, opts OtelOptions) (func(ctx context.Context) 
 	if err != nil {
 		return nil, err
 	}
+	c, _ := metricglobal.Meter("asd").SyncInt64().Counter("asd")
+	c.Add(ctx, 1)
 	bsp := tracesdk.NewBatchSpanProcessor(traceExporter)
 	traceProvider := tracesdk.NewTracerProvider(
 		tracesdk.WithSampler(tracesdk.AlwaysSample()),
@@ -89,3 +94,9 @@ func InitOtel(ctx context.Context, opts OtelOptions) (func(ctx context.Context) 
 		return nil
 	}, err
 }
+
+func TracerProvider(name string, opts ...trace.TracerOption) trace.TracerProvider {
+	return otel.GetTracerProvider()
+}
+
+var NoOpTracer = trace.NewNoopTracerProvider()

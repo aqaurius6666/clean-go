@@ -25,20 +25,23 @@ RUN curl -fLo install.sh https://raw.githubusercontent.com/cosmtrek/air/master/i
 
 FROM base as builder
 
-ARG BINARY_NAME=clean-go
-
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
+
+ARG APP_NAME=clean-go
+
+
 RUN make build
-RUN /tmp/${BINARY_NAME} --help
+
+RUN /tmp/${APP_NAME} --help
 
 
 FROM alpine as release
 
-ARG BINARY_NAME=clean-go
+ARG APP_NAME=clean-go
 
 WORKDIR /app
 # COPY --from=builder /bin/grpc_health_probe /bin/grpc_health_probe
-COPY --from=builder /tmp/${BINARY_NAME} /usr/bin/app
+COPY --from=builder /tmp/${APP_NAME} /usr/bin/app
 ENTRYPOINT ["/usr/bin/app"]

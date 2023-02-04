@@ -13,7 +13,8 @@ func TestFanIn(t *testing.T) {
 	inputChan2 := make(chan int, len(input2))
 	defer close(inputChan1)
 	defer close(inputChan2)
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
 	for _, v := range input1 {
 		inputChan1 <- v
 	}
