@@ -49,10 +49,6 @@ func serve(cfg config.AppConfig) error {
 		return errors.New("buildApp failed")
 	}
 	app.Logger.Info("Initialize application successfully")
-	if err = app.Migrator.Migrate(ctx); err != nil {
-		return err
-	}
-	app.Logger.Info("Migrate successfully")
 
 	httpServer := &http.Server{
 		Addr:    fmt.Sprintf(":%s", cfg.Http.Port),

@@ -48,11 +48,11 @@ Authorization: Bearer {{token}}
 }
 
 ###
-GET {{host}}/posts/me
+GET {{host}}/posts/me?limit=3
 Authorization: Bearer {{token}}
 
 ###
-POST {{host}}/posts/ce6d86c5-2164-471c-bf41-644b5e20893d/like
+POST {{host}}/posts/473cff1f-981f-4cfd-a3e2-8d819d88e4aa/like
 Authorization: Bearer {{token}}
 
 ###

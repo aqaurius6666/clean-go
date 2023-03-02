@@ -2,8 +2,8 @@ package v1
 
 import (
 	"github.com/aqaurius6666/clean-go/internal/entities"
-	"github.com/aqaurius6666/clean-go/pkg/proto/apipb"
 	"github.com/aqaurius6666/clean-go/pkg/response"
+	apipb "github.com/aqaurius6666/cleango-protobuf/gen/cleango/api/v1"
 	"github.com/gin-gonic/gin"
 )
 

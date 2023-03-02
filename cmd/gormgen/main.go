@@ -29,6 +29,7 @@ func main() {
 	g.ApplyBasic(entities.User{}, entities.Post{})
 
 	g.ApplyInterface(func(UserQuerier) {}, entities.User{})
+
 	g.ApplyInterface(func(PostQuerier) {}, entities.Post{})
 	g.ApplyInterface(func(ReactQuerier) {}, entities.React{})
 

@@ -2,9 +2,9 @@ package v1
 
 import (
 	"github.com/aqaurius6666/clean-go/internal/entities"
-	"github.com/aqaurius6666/clean-go/pkg/proto/apipb"
-	"github.com/aqaurius6666/clean-go/pkg/proto/entitypb"
 	"github.com/aqaurius6666/clean-go/pkg/response"
+	apipb "github.com/aqaurius6666/cleango-protobuf/gen/cleango/api/v1"
+	entitypb "github.com/aqaurius6666/cleango-protobuf/gen/cleango/entity/v1"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,10 +36,14 @@ func (s *Handler) HandlePostsMeGet(g *gin.Context) {
 	ret := make([]*apipb.PostsMeGetResponse_Post, len(posts))
 	for i, v := range posts {
 		ret[i] = &apipb.PostsMeGetResponse_Post{
-			Id:        v.ID,
-			Content:   v.Content,
-			Title:     v.Title,
-			CreatorId: v.CreatorID,
+			Id:      v.ID,
+			Content: v.Content,
+			Title:   v.Title,
+			// CreatorId: v.CreatorID,
+			Creator: &entitypb.User{
+				Id:   v.Creator.ID,
+				Name: v.Creator.Name,
+			},
 		}
 	}
 	response.Response200(g, &apipb.PostsMeGetResponse{

@@ -4,8 +4,8 @@ import (
 	"reflect"
 
 	"github.com/aqaurius6666/clean-go/pkg/gentity"
-	"github.com/aqaurius6666/clean-go/pkg/proto/genericpb"
 	"github.com/aqaurius6666/clean-go/pkg/response"
+	genericpb "github.com/aqaurius6666/cleango-protobuf/gen/cleango/generic/v1"
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"

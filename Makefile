@@ -18,6 +18,7 @@ install:
 	@ go install github.com/envoyproxy/protoc-gen-validate/cmd/protoc-gen-validate-go@latest
 	@ go install github.com/cosmos/gogoproto/protoc-gen-gogo@latest
 	@ go install github.com/cosmos/gogoproto/protoc-gen-gogofast@latest
+	@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 dev-recreate:
 	@ docker-compose -f deploy/dev/docker-compose.yaml up -d
@@ -74,3 +75,7 @@ monitor:
 
 logs:
 	@ docker-compose -f deploy/dev/docker-compose.yaml logs -f $(APP_NAME) 
+
+
+create-migrate:
+	@ migrate 
