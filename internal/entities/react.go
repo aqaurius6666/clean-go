@@ -1,11 +1,14 @@
 package entities
 
+import entitypb "github.com/aqaurius6666/cleango-protobuf/gen-go/cleango/entity/v1"
+
 type React struct {
 	UserID string    `gorm:"type:uuid;index:idx_react_user_id_post_id" json:"user_id" bson:"-"`
 	User   *User     `gorm:"foreignKey:UserID" json:"user" bson:"-"`
 	PostID string    `gorm:"type:uuid;index:idx_react_user_id_post_id" json:"post_id" bson:"-"`
 	Post   *Post     `gorm:"foreignKey:PostID" json:"post" bson:"-"`
 	Type   ReactType `gorm:"type:varchar(12)" json:"type" bson:"type,omitempty"`
+	Count  *int64    `gorm:"column:count" json:"count" bson:"count,omitempty"`
 }
 
 func (*React) IsEntity() {}
@@ -25,3 +28,14 @@ const (
 	ReactLike    ReactType = "LIKE"
 	ReactDislike ReactType = "DISLIKE"
 )
+
+func ReactType2Proto(t ReactType) entitypb.ReactType {
+	switch t {
+	case ReactLike:
+		return entitypb.ReactType_REACT_TYPE_LIKE
+	case ReactDislike:
+		return entitypb.ReactType_REACT_TYPE_DISLIKE
+	default:
+		panic("invalid react type")
+	}
+}

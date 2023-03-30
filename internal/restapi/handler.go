@@ -24,4 +24,5 @@ type PostHandler interface {
 	HandlePostsPost(*gin.Context)
 	HandlePostsLikePost(*gin.Context)
 	HandlePostsDislikePost(*gin.Context)
+	HandlePostsReactGet(*gin.Context)
 }

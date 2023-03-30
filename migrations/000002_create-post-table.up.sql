@@ -6,6 +6,4 @@ create table posts
     creator_id uuid
 );
 
-alter table posts
-    add constraint fk_posts_creator_id_users_id
-        foreign key (creator_id) references users (id);
+create unique index idx_posts_creator_id on posts (creator_id);

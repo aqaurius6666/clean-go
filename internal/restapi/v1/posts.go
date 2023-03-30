@@ -2,9 +2,10 @@ package v1
 
 import (
 	"github.com/aqaurius6666/clean-go/internal/entities"
+	"github.com/aqaurius6666/clean-go/pkg/ptr"
 	"github.com/aqaurius6666/clean-go/pkg/response"
-	apipb "github.com/aqaurius6666/cleango-protobuf/gen/cleango/api/v1"
-	entitypb "github.com/aqaurius6666/cleango-protobuf/gen/cleango/entity/v1"
+	apipb "github.com/aqaurius6666/cleango-protobuf/gen-go/cleango/api/v1"
+	entitypb "github.com/aqaurius6666/cleango-protobuf/gen-go/cleango/entity/v1"
 	"github.com/gin-gonic/gin"
 )
 
@@ -84,7 +85,7 @@ func (s *Handler) HandlePostsPost(g *gin.Context) {
 
 func (s *Handler) HandlePostsLikePost(g *gin.Context) {
 	ctx := g.Request.Context()
-	req := apipb.PostsReactPostRequest{}
+	req := apipb.PostsReactLikePostRequest{}
 	req.PostId = g.Param("postId")
 	if err := req.Validate(); err != nil {
 		response.Response400(g, err)
@@ -97,12 +98,12 @@ func (s *Handler) HandlePostsLikePost(g *gin.Context) {
 		response.Response400(g, err)
 		return
 	}
-	response.Response200(g, &apipb.PostsPostResponse{})
+	response.Response200(g, &apipb.PostsReactLikePostResponse{})
 }
 
 func (s *Handler) HandlePostsDislikePost(g *gin.Context) {
 	ctx := g.Request.Context()
-	req := apipb.PostsReactPostRequest{}
+	req := apipb.PostsReactDislikePostRequest{}
 	req.PostId = g.Param("postId")
 	if err := req.Validate(); err != nil {
 		response.Response400(g, err)
@@ -115,5 +116,35 @@ func (s *Handler) HandlePostsDislikePost(g *gin.Context) {
 		response.Response400(g, err)
 		return
 	}
-	response.Response200(g, &apipb.PostsPostResponse{})
+	response.Response200(g, &apipb.PostsReactDislikePostResponse{})
+}
+
+func (s *Handler) HandlePostsReactGet(g *gin.Context) {
+	ctx := g.Request.Context()
+	req := apipb.PostsReactGetRequest{}
+	req.PostIds = g.QueryArray("postIds")
+	if err := req.Validate(); err != nil {
+		response.Response400(g, err)
+		return
+	}
+	req.XId = g.GetString("id")
+
+	reacts, err := s.Usecase.GetReactsByPostIds(ctx, req.PostIds)
+	if err != nil {
+		response.Response400(g, err)
+		return
+	}
+	postReacts := make(map[string]*entitypb.Reacts)
+	for _, r := range reacts {
+		if postReacts[r.PostID] == nil {
+			postReacts[r.PostID] = &entitypb.Reacts{
+				Reacts: make(map[string]int64),
+			}
+		}
+
+		postReacts[r.PostID].Reacts[entities.ReactType2Proto(r.Type).String()] = ptr.ValueAny(r.Count)
+	}
+	response.Response200(g, &apipb.PostsReactGetResponse{
+		PostReacts: postReacts,
+	})
 }

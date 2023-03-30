@@ -27,7 +27,9 @@ type PostRepository interface {
 }
 
 type ReactRepository interface {
-	InsertReact(ctx context.Context, react *entities.React) (*entities.React, error)
+	UpsertReact(ctx context.Context, react *entities.React) (*entities.React, error)
+	GetReactsByPostId(ctx context.Context, id string) ([]*entities.React, error)
+	GetReactsByPostIds(ctx context.Context, ids []string) ([]*entities.React, error)
 }
 type Migrator interface {
 	Migrate(context.Context) error

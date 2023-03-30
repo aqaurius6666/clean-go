@@ -3,7 +3,7 @@ package v1
 import (
 	"github.com/aqaurius6666/clean-go/pkg/jwt"
 	"github.com/aqaurius6666/clean-go/pkg/response"
-	apipb "github.com/aqaurius6666/cleango-protobuf/gen/cleango/api/v1"
+	apipb "github.com/aqaurius6666/cleango-protobuf/gen-go/cleango/api/v1"
 	"github.com/gin-gonic/gin"
 )
 

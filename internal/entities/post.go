@@ -5,7 +5,7 @@ type Post struct {
 	Title     string `json:"title" bson:"title,omitempty"`
 	Content   string `json:"content" bson:"content,omitempty"`
 	CreatorID string `json:"creator_id" bson:"-"`
-	Creator   *User  `gorm:"foreignKey:creator_id;references:id" json:"creator" bson:"-"`
+	Creator   *User  `gorm:"foreignKey:CreatorID;references:ID" json:"creator" bson:"-"`
 }
 
 func (s *Post) SetId(id interface{}) {

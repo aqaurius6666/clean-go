@@ -1,0 +1,1 @@
+create index idx_posts_creator_id on posts (creator_id);

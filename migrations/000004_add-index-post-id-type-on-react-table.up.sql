@@ -1,0 +1,1 @@
+create index idx_reacts_post_id_type on reacts (post_id, type);

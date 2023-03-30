@@ -11,6 +11,7 @@ import (
 	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type ORMRepository struct {
@@ -24,6 +25,7 @@ func ConnectGorm(cfg config.DBConfig) (*gorm.DB, error) {
 		&gorm.Config{
 			PrepareStmt:                              true,
 			DisableForeignKeyConstraintWhenMigrating: true,
+			Logger:                                   logger.Default.LogMode(logger.Info),
 		},
 	}
 	var (
@@ -49,7 +51,6 @@ func ConnectGorm(cfg config.DBConfig) (*gorm.DB, error) {
 			return nil, err
 		}
 	}
-
 	gormgen.SetDefault(db)
 
 	return db, nil

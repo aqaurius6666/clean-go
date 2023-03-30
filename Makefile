@@ -77,5 +77,9 @@ logs:
 	@ docker-compose -f deploy/dev/docker-compose.yaml logs -f $(APP_NAME) 
 
 
-create-migrate:
-	@ migrate 
+migrate-up:
+	@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+	@ migrate -source file://migrations -database postgres://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}\?sslmode=disable up 
+
+gen-gorm:
+	@ go run ./cmd/gormgen

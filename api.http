@@ -29,7 +29,7 @@ POST {{host}}/auth/refresh
 ###
 GET {{host}}/users/me
 Authorization: Bearer {{token}}
-
+    
 ###
 PUT {{host}}/users/me
 Authorization: Bearer {{token}}
@@ -52,9 +52,13 @@ GET {{host}}/posts/me?limit=3
 Authorization: Bearer {{token}}
 
 ###
-POST {{host}}/posts/473cff1f-981f-4cfd-a3e2-8d819d88e4aa/like
+POST {{host}}/posts/2ef2163c-150f-43d9-bd73-a190b2a2be32/like
 Authorization: Bearer {{token}}
 
 ###
-POST {{host}}/posts/ce6d86c5-2164-471c-bf41-644b5e20893d/dislike
+POST {{host}}/posts/91468d3c-8eab-4a2b-ae2f-2f729e732b6f/dislike
+Authorization: Bearer {{token}}
+
+###
+GET {{host}}/posts/reacts?postIds=91468d3c-8eab-4a2b-ae2f-2f729e732b6f&&postIds=2ef2163c-150f-43d9-bd73-a190b2a2be32
 Authorization: Bearer {{token}}

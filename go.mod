@@ -3,7 +3,7 @@ module github.com/aqaurius6666/clean-go
 go 1.19
 
 require (
-	github.com/aqaurius6666/cleango-protobuf v0.0.2
+	github.com/aqaurius6666/cleango-protobuf v0.0.5
 	github.com/cosmos/gogoproto v1.4.6
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/validator/v10 v10.11.1
@@ -108,3 +108,5 @@ require (
 	gorm.io/driver/mysql v1.4.5 // indirect
 	gorm.io/hints v1.1.1 // indirect
 )
+
+replace github.com/aqaurius6666/cleango-protobuf => ../cleango-protobuf

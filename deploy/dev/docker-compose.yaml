@@ -7,16 +7,18 @@ services:
     build:
       context: ../..
       target: dev
+    env_file:
+      - .env
     environment:
       - DEBUG=${DEBUG}
       - DEBUG_PORT=${DEBUG_PORT}
-    env_file:
-      - .env
+    
     command: 
       - air
 
     volumes:
       - ../..:/app
+      - ../../../cleango-protobuf:/cleango-protobuf
       - $HOME/go/pkg:/go/pkg
       - gocache:/root/.cache/go-build
     ports:
@@ -38,6 +40,8 @@ services:
       POSTGRES_PASSWORD: cleango
       POSTGRES_USER: cleango
       POSTGRES_DB: cleango
+    volumes:
+      - postgesdb:/var/lib/postgresql/data
     ports:
       - 5432:5432
     networks:
@@ -67,4 +71,5 @@ services:
   #     - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
   #     - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
 volumes:
+  postgesdb:
   gocache:

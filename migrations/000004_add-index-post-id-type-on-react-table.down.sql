@@ -1,0 +1,1 @@
+drop index if exists idx_reacts_post_id_type;

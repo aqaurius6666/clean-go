@@ -43,5 +43,6 @@ func (s *RestAPIServer) RegisterEndpoint() {
 	postG.GET("/me", s.Middleware.Token, s.Handler.HandlePostsMeGet)
 	postG.POST("/:postId/like", s.Middleware.Token, s.Handler.HandlePostsLikePost)
 	postG.POST("/:postId/dislike", s.Middleware.Token, s.Handler.HandlePostsDislikePost)
+	postG.GET("/reacts", s.Middleware.Token, s.Handler.HandlePostsReactGet)
 
 }

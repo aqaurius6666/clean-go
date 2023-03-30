@@ -2,7 +2,6 @@ package orm
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aqaurius6666/clean-go/internal/entities"
 	"github.com/aqaurius6666/clean-go/internal/repositories/orm/gormgen"
@@ -19,20 +18,16 @@ func (s *ORMRepository) GetPostById(ctx context.Context, id string) (*entities.P
 
 func (s *ORMRepository) ListPostsByCreatorId(ctx context.Context, id string, offset int, limit int) ([]*entities.Post, error) {
 	postQ := gormgen.Post
-	userQ := gormgen.User
-	fmt.Printf("postQ.Creator.GetSelects(): %v\n", postQ.Creator.GetSelects())
 	posts, err := postQ.
 		WithContext(ctx).
-		// Select(postQ.ALL).
-		Select(postQ.Creator.GetSelects()...).
+		Preload(postQ.Creator.RelationField).
 		Where(postQ.CreatorID.Eq(id)).
-		LeftJoin(userQ, postQ.CreatorID.EqCol(userQ.ID)).
 		Offset(offset).
-		Debug().
 		Limit(limit).Find()
 	if err != nil {
 		return nil, err
 	}
+
 	return posts, nil
 }
 

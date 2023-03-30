@@ -1,0 +1,1 @@
+drop index idx_posts_creator_id;
