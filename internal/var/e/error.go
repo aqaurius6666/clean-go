@@ -1,8 +1,6 @@
 package e
 
-import (
-	"github.com/pkg/errors"
-)
+import "errors"
 
 var (
 	ErrCredentialWrong  = errors.New("email or password wrong")

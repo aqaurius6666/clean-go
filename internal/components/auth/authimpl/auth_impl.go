@@ -1,24 +1,26 @@
-package usecases
+package authimpl
 
 import (
 	"context"
 	"time"
 
+	"github.com/aqaurius6666/clean-go/internal/components/auth"
+	"github.com/aqaurius6666/clean-go/internal/components/user"
+	"github.com/aqaurius6666/clean-go/internal/config"
 	"github.com/aqaurius6666/clean-go/internal/entities"
 	"github.com/aqaurius6666/clean-go/internal/var/e"
 	"github.com/aqaurius6666/clean-go/pkg/gentity"
 	"github.com/aqaurius6666/clean-go/pkg/jwt"
 )
 
-type AuthUsecases interface {
-	RegisterNewUser(ctx context.Context, email, password, name string) (string, error)
-	VerifyUserCredential(ctx context.Context, email, password string) (string, error)
-	IssueToken(ctx context.Context, id string) (accessToken, refreshToken string, expAt int64, err error)
-	VerifyToken(ctx context.Context, token string, tokenType jwt.TokenType) (string, error)
+type UseCaseImpl struct {
+	AuthRepo   auth.Repository
+	AuthConfig config.AuthConfig
+	User       user.UseCase
 }
 
-func (s *UsecasesService) RegisterNewUser(ctx context.Context, email string, password string, name string) (string, error) {
-	u, err := s.Repo.InsertUser(ctx, gentity.WithExtend(&entities.User{
+func (s *UseCaseImpl) RegisterNewUser(ctx context.Context, email string, password string, name string) (string, error) {
+	u, err := s.AuthRepo.InsertUser(ctx, gentity.WithExtend(&entities.User{
 		Email:    email,
 		Password: password,
 		Name:     name,
@@ -29,8 +31,8 @@ func (s *UsecasesService) RegisterNewUser(ctx context.Context, email string, pas
 	return u.ID, nil
 }
 
-func (s *UsecasesService) VerifyUserCredential(ctx context.Context, email string, password string) (string, error) {
-	u, err := s.Repo.SelectUser(ctx, gentity.WithExtend(&entities.User{
+func (s *UseCaseImpl) VerifyUserCredential(ctx context.Context, email string, password string) (string, error) {
+	u, err := s.AuthRepo.SelectUser(ctx, gentity.WithExtend(&entities.User{
 		Email:    email,
 		Password: password,
 	}, nil))
@@ -40,7 +42,7 @@ func (s *UsecasesService) VerifyUserCredential(ctx context.Context, email string
 	return u.ID, nil
 }
 
-func (s *UsecasesService) IssueToken(ctx context.Context, id string) (accessToken string, refreshToken string, expAt int64, err error) {
+func (s *UseCaseImpl) IssueToken(ctx context.Context, id string) (accessToken string, refreshToken string, expAt int64, err error) {
 	expTime := time.Now().Add(time.Duration(s.AuthConfig.ExpireDuration) * time.Second)
 	access, err := jwt.IssueJWT(s.AuthConfig.Secret, id, jwt.AccessTokenType, expTime)
 	if err != nil {
@@ -53,7 +55,7 @@ func (s *UsecasesService) IssueToken(ctx context.Context, id string) (accessToke
 	return access, refresh, expTime.Unix(), nil
 }
 
-func (s *UsecasesService) VerifyToken(ctx context.Context, token string, tokenType jwt.TokenType) (string, error) {
+func (s *UseCaseImpl) VerifyToken(ctx context.Context, token string, tokenType jwt.TokenType) (string, error) {
 	id, _tokenType, err := jwt.VerifyJWT(s.AuthConfig.Secret, token)
 	if err != nil {
 		return "", err

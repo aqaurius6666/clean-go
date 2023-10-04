@@ -23,13 +23,13 @@ func (s *Handler) HandlePostsMeGet(g *gin.Context) {
 		response.Response400(g, err)
 		return
 	}
-	total, err := s.Usecase.TotalPosts(ctx, req.XId)
+	total, err := s.Post.TotalPosts(ctx, req.XId)
 	if err != nil {
 		response.Response400(g, err)
 		return
 	}
 	req.Pagination.Total = total
-	posts, err := s.Usecase.ListPosts(ctx, req.XId, ptr.PtrIntNilIfZero(req.Pagination.Limit), ptr.PtrIntNilIfZero(req.Pagination.Offset))
+	posts, err := s.Post.ListPosts(ctx, req.XId, ptr.PtrNilIfZero(req.Pagination.Limit), ptr.PtrNilIfZero(req.Pagination.Offset))
 	if err != nil {
 		response.Response400(g, err)
 		return
@@ -63,7 +63,7 @@ func (s *Handler) HandlePostsPost(g *gin.Context) {
 	}
 	req.XId = g.GetString("id")
 
-	p, err := s.Usecase.CreatePost(ctx, req.XId, &entities.Post{
+	p, err := s.Post.CreatePost(ctx, req.XId, &entities.Post{
 		Title:   req.Title,
 		Content: req.Content,
 	})

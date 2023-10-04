@@ -10,11 +10,10 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
-	metricglobal "go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
-	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
-	tracesdk "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -28,7 +27,10 @@ type OtelOptions struct {
 }
 
 func InitOtel(ctx context.Context, opts OtelOptions) (func(ctx context.Context) error, error) {
-	conn, err := grpc.DialContext(ctx, opts.CollectorAddr, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+	conn, err := grpc.DialContext(ctx, opts.CollectorAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -39,20 +41,20 @@ func InitOtel(ctx context.Context, opts OtelOptions) (func(ctx context.Context) 
 	if err != nil {
 		return nil, err
 	}
-	metricProvider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithResource(resource.NewWithAttributes(
+	metricProvider := metric.NewMeterProvider(
+		metric.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.ServiceNameKey.String(opts.ServiceName),
 			attribute.Int64("ID", opts.ID),
 		)),
-		sdkmetric.WithReader(
-			sdkmetric.NewPeriodicReader(
+		metric.WithReader(
+			metric.NewPeriodicReader(
 				metricExporter,
-				sdkmetric.WithInterval(opts.MetricPeriodic),
+				metric.WithInterval(opts.MetricPeriodic),
 			),
 		),
 	)
-	metricglobal.SetMeterProvider(metricProvider)
+	otel.SetMeterProvider(metricProvider)
 	err = runtime.Start(runtime.WithMinimumReadMemStatsInterval(opts.MetricPeriodic))
 	if err != nil {
 		return nil, err
@@ -63,15 +65,15 @@ func InitOtel(ctx context.Context, opts OtelOptions) (func(ctx context.Context) 
 	if err != nil {
 		return nil, err
 	}
-	bsp := tracesdk.NewBatchSpanProcessor(traceExporter)
-	traceProvider := tracesdk.NewTracerProvider(
-		tracesdk.WithSampler(tracesdk.AlwaysSample()),
-		tracesdk.WithResource(resource.NewWithAttributes(
+	bsp := trace.NewBatchSpanProcessor(traceExporter)
+	traceProvider := trace.NewTracerProvider(
+		trace.WithSampler(trace.AlwaysSample()),
+		trace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.ServiceNameKey.String(opts.ServiceName),
 			attribute.Int64("ID", opts.ID),
 		)),
-		tracesdk.WithSpanProcessor(bsp),
+		trace.WithSpanProcessor(bsp),
 	)
 	otel.SetTextMapPropagator(propagation.TraceContext{})
 	otel.SetTracerProvider(traceProvider)

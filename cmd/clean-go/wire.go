@@ -1,20 +1,22 @@
 //go:build wireinject
-// +build wireinject
 
 package main
 
 import (
 	"context"
 
+	"github.com/aqaurius6666/clean-go/internal/components/auth"
+	"github.com/aqaurius6666/clean-go/internal/components/auth/authimpl"
+	"github.com/aqaurius6666/clean-go/internal/components/post"
+	"github.com/aqaurius6666/clean-go/internal/components/post/postimpl"
+	"github.com/aqaurius6666/clean-go/internal/components/user"
+	"github.com/aqaurius6666/clean-go/internal/components/user/userimpl"
 	"github.com/aqaurius6666/clean-go/internal/config"
 	"github.com/aqaurius6666/clean-go/internal/entities"
 	"github.com/aqaurius6666/clean-go/internal/generics"
 	"github.com/aqaurius6666/clean-go/internal/repositories"
-	"github.com/aqaurius6666/clean-go/internal/repositories/odm"
-	"github.com/aqaurius6666/clean-go/internal/repositories/orm"
 	"github.com/aqaurius6666/clean-go/internal/restapi"
 	v1 "github.com/aqaurius6666/clean-go/internal/restapi/v1"
-	"github.com/aqaurius6666/clean-go/internal/usecases"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/sirupsen/logrus"
@@ -22,16 +24,31 @@ import (
 
 type App struct {
 	RestApiServer restapi.Server
-	Migrator      usecases.Migrator
+	Migrator      Migrator
 	Logger        *logrus.Logger
+}
+type Migrator interface {
+	Migrate(context.Context) error
 }
 
 // wire provider set
 var (
-	UsecaseSet = wire.NewSet(
-		wire.Struct(new(usecases.UsecasesService), "*"),
-		wire.Bind(new(usecases.Usecases), new(*usecases.UsecasesService)),
+	UserSet = wire.NewSet(
+		wire.Struct(new(userimpl.UsecasesImpl), "*"),
+		wire.Bind(new(user.Usecases), new(*userimpl.UsecasesImpl)),
+		CastUserRepository,
 	)
+	PostSet = wire.NewSet(
+		wire.Struct(new(postimpl.UsecasesImpl), "*"),
+		wire.Bind(new(post.Usecases), new(*postimpl.UsecasesImpl)),
+		CastPostRepository,
+	)
+	AuthSet = wire.NewSet(
+		wire.Struct(new(authimpl.UsecasesImpl), "*"),
+		wire.Bind(new(auth.Usecases), new(*authimpl.UsecasesImpl)),
+		CastAuthRepository,
+	)
+
 	// ORMSet = wire.NewSet(
 	// 	wire.Bind(new(usecases.Repository), new(*orm.ORMRepository)),
 	// 	wire.Bind(new(usecases.Migrator), new(*orm.ORMRepository)),
@@ -46,7 +63,7 @@ var (
 	// )
 	RepositorySet = wire.NewSet(
 		repositories.BuildRepository,
-		CastRepository,
+		// CastRepository,
 		CastMigrator,
 	)
 	RestSet = wire.NewSet(
@@ -62,11 +79,7 @@ var (
 
 // interface constraints
 var (
-	_ usecases.Usecases                          = (*usecases.UsecasesService)(nil)
-	_ usecases.Repository                        = (*orm.ORMRepository)(nil)
-	_ usecases.Repository                        = (*odm.ODMRepository)(nil)
 	_ generics.GenericRepository[*entities.User] = (*generics.ORMGenericRepository[*entities.User])(nil)
-	_ usecases.Migrator                          = (*orm.ORMRepository)(nil)
 	_ restapi.Server                             = (*restapi.RestAPIServer)(nil)
 	_ restapi.Handler                            = (*v1.Handler)(nil)
 	_ restapi.Middleware                         = (*v1.Middleware)(nil)
@@ -79,25 +92,33 @@ func BuildApp(ctx context.Context, cfg config.AppConfig) (*App, error) {
 		wire.Struct(new(App), "*"),
 		config.NewLogger,
 		RestSet,
-		UsecaseSet,
+		UserSet,
+		PostSet,
+		AuthSet,
 		RepositorySet,
 		// ODMSet,
 	)
 	return nil, nil
 }
 
-func CastRepository(r repositories.RepositoryImpl) usecases.Repository {
-	repo, ok := r.(usecases.Repository)
-	if !ok {
-		panic("failed to cast repository")
-	}
-	return repo
+// func CastRepository(r repositories.RepositoryImpl) usecases.Repository {
+// 	repo, ok := r.(usecases.Repository)
+// 	if !ok {
+// 		panic("failed to cast repository")
+// 	}
+// 	return repo
+// }
+
+func CastMigrator(r repositories.RepositoryImpl) Migrator {
+	return CastRepositoryTo[Migrator](r)
 }
 
-func CastMigrator(r repositories.RepositoryImpl) usecases.Migrator {
-	repo, ok := r.(usecases.Migrator)
-	if !ok {
-		panic("failed to cast migrator")
-	}
-	return repo
+func CastUserRepository(r repositories.RepositoryImpl) user.Repository {
+	return CastRepositoryTo[user.Repository](r)
+}
+func CastPostRepository(r repositories.RepositoryImpl) post.Repository {
+	return CastRepositoryTo[post.Repository](r)
+}
+func CastAuthRepository(r repositories.RepositoryImpl) auth.Repository {
+	return CastRepositoryTo[auth.Repository](r)
 }

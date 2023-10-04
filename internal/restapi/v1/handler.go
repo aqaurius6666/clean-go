@@ -1,9 +1,13 @@
 package v1
 
 import (
-	"github.com/aqaurius6666/clean-go/internal/usecases"
+	"github.com/aqaurius6666/clean-go/internal/components/auth"
+	"github.com/aqaurius6666/clean-go/internal/components/post"
+	"github.com/aqaurius6666/clean-go/internal/components/user"
 )
 
 type Handler struct {
-	Usecase usecases.Usecases
+	Auth auth.UseCase
+	User user.UseCase
+	Post post.UseCase
 }

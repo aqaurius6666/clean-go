@@ -3,7 +3,7 @@ package v1
 import (
 	"strings"
 
-	"github.com/aqaurius6666/clean-go/internal/usecases"
+	"github.com/aqaurius6666/clean-go/internal/components/auth"
 	"github.com/aqaurius6666/clean-go/internal/var/e"
 	"github.com/aqaurius6666/clean-go/pkg/jwt"
 	"github.com/aqaurius6666/clean-go/pkg/response"
@@ -12,8 +12,8 @@ import (
 )
 
 type Middleware struct {
-	L        *logrus.Logger
-	Usecases usecases.Usecases
+	L    *logrus.Logger
+	Auth auth.UseCase
 }
 
 func (s *Middleware) Token(c *gin.Context) {
@@ -24,7 +24,7 @@ func (s *Middleware) Token(c *gin.Context) {
 		return
 	}
 
-	id, err := s.Usecases.VerifyToken(ctx, authStr[7:], jwt.AccessTokenType)
+	id, err := s.Auth.VerifyToken(ctx, authStr[7:], jwt.AccessTokenType)
 	if err != nil {
 		response.Response401(c, err)
 

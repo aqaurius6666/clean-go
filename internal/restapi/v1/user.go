@@ -12,7 +12,7 @@ func (s *Handler) HandleMeGet(g *gin.Context) {
 	req := apipb.MeGetRequest{}
 	req.XId = g.GetString("id")
 
-	u, err := s.Usecase.GetUser(ctx, req.XId)
+	u, err := s.User.GetUser(ctx, req.XId)
 	if err != nil {
 		response.Response400(g, err)
 		return
@@ -38,7 +38,7 @@ func (s *Handler) HandleMePut(g *gin.Context) {
 	}
 	req.XId = g.GetString("id")
 
-	u, err := s.Usecase.UpdateUser(ctx, req.XId, &entities.User{
+	u, err := s.User.UpdateUser(ctx, req.XId, &entities.User{
 		Name: req.Name,
 	})
 	if err != nil {

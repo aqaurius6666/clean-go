@@ -18,12 +18,12 @@ func (s *Handler) HandleLoginPost(g *gin.Context) {
 		response.Response400(g, err)
 		return
 	}
-	id, err := s.Usecase.VerifyUserCredential(ctx, req.Email, req.Password)
+	id, err := s.Auth.VerifyUserCredential(ctx, req.Email, req.Password)
 	if err != nil {
 		response.Response400(g, err)
 		return
 	}
-	accessToken, refreshToken, expAt, err := s.Usecase.IssueToken(ctx, id)
+	accessToken, refreshToken, expAt, err := s.Auth.IssueToken(ctx, id)
 	if err != nil {
 		response.Response400(g, err)
 		return
@@ -47,7 +47,7 @@ func (s *Handler) HandleRegisterPost(g *gin.Context) {
 		response.Response400(g, err)
 		return
 	}
-	id, err := s.Usecase.RegisterNewUser(ctx, req.Email, req.Password, req.Email)
+	id, err := s.Auth.RegisterNewUser(ctx, req.Email, req.Password, req.Email)
 	if err != nil {
 		response.Response400(g, err)
 		return
@@ -70,12 +70,12 @@ func (s *Handler) HandleRefreshPost(g *gin.Context) {
 		response.Response400(g, err)
 		return
 	}
-	id, err := s.Usecase.VerifyToken(ctx, req.RefreshToken, jwt.RefreshTokenType)
+	id, err := s.Auth.VerifyToken(ctx, req.RefreshToken, jwt.RefreshTokenType)
 	if err != nil {
 		response.Response400(g, err)
 		return
 	}
-	accessToken, refreshToken, expAt, err := s.Usecase.IssueToken(ctx, id)
+	accessToken, refreshToken, expAt, err := s.Auth.IssueToken(ctx, id)
 	if err != nil {
 		response.Response400(g, err)
 		return

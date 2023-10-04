@@ -1,22 +1,17 @@
 package ptr
 
-func PtrBoolNilIfZero(v bool) *bool {
-	if v {
-		return &v
+func PtrNilIfZero[T comparable](v T) *T {
+	var t T
+	if v == t {
+		return nil
 	}
-	return nil
+	return &v
 }
 
-func PtrIntNilIfZero(v int) *int {
-	if v != 0 {
-		return &v
+func ValueZeroIfNil[T any](v *T) T {
+	if v == nil {
+		var t T
+		return t
 	}
-	return nil
-}
-
-func PtrStringNilIfZero(v string) *string {
-	if v != "" {
-		return &v
-	}
-	return nil
+	return *v
 }

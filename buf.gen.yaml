@@ -17,7 +17,7 @@ plugins:
       - Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types
       - Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types
       - Mgoogle/protobuf/field_mask.proto=github.com/gogo/protobuf/types
-  - name: openapiv2
+  - plugin: buf.build/grpc-ecosystem/openapiv2:v2.15
     out: pkg/swagger
     opt:
       - logtostderr=true

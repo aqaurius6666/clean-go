@@ -1,0 +1,52 @@
+receivers:
+  loki:
+    protocols:
+      http:
+    use_incoming_timestamp: true
+  otlp:
+    protocols:
+      grpc:
+
+exporters:
+  jaeger:
+    endpoint: jaeger:14250
+    tls:
+      insecure: true
+  prometheus:
+    endpoint: 0.0.0.0:8889
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    tls:
+      insecure: true
+
+processors:
+  batch:
+  attributes:
+    actions:
+      - action: insert
+        key: loki.attribute.labels
+        value: service_name
+      - action: insert
+        key: loki.format
+        value: raw
+  attributes/metrics:
+    actions:
+      - action: delete
+        key: exported_job
+service:
+  telemetry:
+    logs:
+      level: "debug"
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [jaeger]
+    metrics:
+      receivers: [otlp]
+      processors: [batch, attributes/metrics]
+      exporters: [prometheus]
+    logs:
+      receivers: [loki]
+      processors: [attributes]
+      exporters: [loki]

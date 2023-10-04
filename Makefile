@@ -1,5 +1,10 @@
 APP_NAME := clean-go
 
+dev-recreate: observability
+	@ export DEBUG=false && \
+	export DEBUG_PORT=2345 && \
+	docker-compose --project-name=${APP_NAME} -f deploy/dev/docker-compose.yaml up -d --force-recreate --build
+
 gen-mock:
 	@ which mockery > /dev/null || (echo \
 	"mockery is not installed. Please install it first:\n \
@@ -36,10 +41,8 @@ wire:
 run:
 	@ export $(cat deploy/dev/.env | xargs) && go run ./... serve
 
-dev-recreate:
-	@ export DEBUG=false && \
-	export DEBUG_PORT=2345 && \
-	docker-compose -f deploy/dev/docker-compose.yaml up -d --force-recreate --build
+observability:
+	@ docker-compose --project-name=${APP_NAME} -f deploy/dev/observability/docker-compose.yaml up -d --force-recreate
 
 dev-recreate-debug: 
 	@ export DEBUG=true && \

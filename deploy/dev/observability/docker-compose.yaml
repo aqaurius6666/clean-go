@@ -1,0 +1,84 @@
+version: '3.7'
+networks:
+  cleango:
+    name: cleango
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    volumes:
+      - ./opentelemetry-collector.config.yaml:/config.yaml
+    command:
+      - --config=/config.yaml
+    expose:
+      - 4317 # for GRPC
+      - 3500 # for HTTP
+    networks:
+      - cleango
+    deploy:
+      resources:
+        limits:
+          memory: 125M
+  jaeger:
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - 16686:16686
+    networks:
+      - cleango
+  prometheus:
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    image: prom/prometheus:latest
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.config.yaml:/etc/prometheus/prometheus.yml
+    networks:
+      - cleango
+  promtail:
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    image: grafana/promtail:latest
+    volumes:
+      - ./promtail.config.yaml:/etc/promtail/promtail.yaml
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - --config.file=/etc/promtail/promtail.yaml
+    networks:
+      - cleango
+  loki:
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    image: grafana/loki:latest
+    expose:
+      - 3100
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - cleango
+  grafana:
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    image: grafana/grafana:latest
+    environment:
+      - "GF_AUTH_DISABLE_LOGIN_FORM=true"
+      - "GF_AUTH_ANONYMOUS_ENABLED=true"
+      - "GF_AUTH_ANONYMOUS_ORG_ROLE=Admin"
+    volumes:
+      - ./grafana.datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    ports:
+      - "3000:3000"
+    networks:
+      - cleango

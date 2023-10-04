@@ -9,7 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type RepositoryImpl interface{}
+type RepositoryImpl interface {
+}
 
 func BuildRepository(logger *logrus.Logger, cfg config.DBConfig) (RepositoryImpl, error) {
 	switch cfg.Scheme {
